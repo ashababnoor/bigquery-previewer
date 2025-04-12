@@ -14,11 +14,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Automatic data size formatting: Scan sizes now show as KB, MB, GB, or TB as appropriate
 - Auto-analysis on text selection: SQL queries are automatically analyzed when text is selected (with rate limiting)
 - Delayed selection analysis: Waits for selections to stabilize before analysis and cancels if selection is removed
+- Custom wait time parameter for analysis function, allowing flexible rate limiting for different analysis triggers
 
 ### Changed
 - Improved performance: Skip analysis when closing files, even if they're being saved during closure
 - Changed notification dialogs to show an "X" close button instead of "Cancel"
 - Improved code organization with centralized SQL file detection logic
+- Enhanced `analyzeQuery` function to accept an optional wait time parameter, providing more flexible control over analysis timing
 
 ## [1.0.0] - 2025-04-12
 
