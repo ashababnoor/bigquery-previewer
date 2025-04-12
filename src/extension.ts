@@ -16,6 +16,11 @@ let closingDocuments = new Set<string>(); // Track documents that are being clos
 const savingDocuments = new Map<string, NodeJS.Timeout>(); // Track documents being saved to detect save-on-close
 let lastFullErrorMessage: string | null = null; // Store the last full error message for viewing
 
+// Dry run tracking
+let dryRunCount: number = 0;
+let lastDryRunTime: number | null = null;
+let dryRunTrackingEnabled: boolean = false;
+
 // Variables for selection analysis
 const SELECTION_DELAY = 750; // 750ms delay before analyzing a selection
 let selectionAnalysisTimer: NodeJS.Timeout | undefined; // Timer for delayed selection analysis
@@ -138,6 +143,7 @@ function getConfiguration() {
         enableNotifications: config.get<boolean>('enableNotifications', false),
         showScanWarnings: config.get<boolean>('showScanWarnings', true),
         changeDebounceDelayMs: config.get<number>('changeDebounceDelayMs', 1500),
+        trackDryRuns: config.get<boolean>('trackDryRuns', false),
     };
 }
 
@@ -156,6 +162,27 @@ async function initializeBigQueryClient(): Promise<BigQuery> {
 
 export async function performDryRun(query: string): Promise<{ scannedBytes: number; errors: string[] }> {
     const bigquery = await initializeBigQueryClient();
+    const config = getConfiguration();
+    const currentTime = Date.now();
+    
+    // Track dry run statistics if enabled
+    if (config.trackDryRuns) {
+        dryRunCount++;
+        const currentTimeString = new Date(currentTime).toLocaleTimeString();
+        let timeDiff = 'N/A';
+        
+        if (lastDryRunTime !== null) {
+            const diffMs = currentTime - lastDryRunTime;
+            timeDiff = `${(diffMs / 1000).toFixed(2)}s`;
+        }
+        
+        const lastTimeString = lastDryRunTime ? new Date(lastDryRunTime).toLocaleTimeString() : 'N/A';
+        
+        console.log(`[BigQuery Previewer] Dry Run #${dryRunCount} | Current: ${currentTimeString} | Last: ${lastTimeString} | Diff: ${timeDiff}`);
+    }
+    
+    // Update last dry run time
+    lastDryRunTime = currentTime;
 
     try {
         const [job] = await bigquery.createQueryJob({
@@ -450,6 +477,12 @@ export function activate(context: vscode.ExtensionContext) {
         if (lastFullErrorMessage) {
             options.push({ label: '$(error) View Full Error', description: 'View the full error message' });
         }
+        
+        // Add option to view dry run tracking stats if enabled
+        const config = getConfiguration();
+        if (config.trackDryRuns) {
+            options.push({ label: '$(graph) Dry Run Stats', description: 'View dry run tracking statistics' });
+        }
 		
 		// Show the quick pick with available options
 		const selected = await vscode.window.showQuickPick(options, {
@@ -465,9 +498,32 @@ export function activate(context: vscode.ExtensionContext) {
 				hideResultStatusBar();
 			} else if (selected.label.includes('View Full Error')) {
                 vscode.window.showErrorMessage(lastFullErrorMessage || 'No error message available.');
+            } else if (selected.label.includes('Dry Run Stats')) {
+                vscode.commands.executeCommand('bigquery-previewer.showDryRunStats');
             }
 		}
 	});
+
+    // Add command to show dry run tracking statistics
+    const showDryRunStatsCommand = vscode.commands.registerCommand('bigquery-previewer.showDryRunStats', () => {
+        const currentTime = new Date().toLocaleTimeString();
+        let timeDiff = 'N/A';
+        
+        if (lastDryRunTime !== null) {
+            const diffMs = Date.now() - lastDryRunTime;
+            timeDiff = `${(diffMs / 1000).toFixed(2)}s`;
+        }
+        
+        const lastTimeString = lastDryRunTime ? new Date(lastDryRunTime).toLocaleTimeString() : 'N/A';
+        
+        const message = `Dry Run Statistics:
+- Total count: ${dryRunCount}
+- Last run: ${lastTimeString}
+- Current time: ${currentTime}
+- Time since last run: ${timeDiff}`;
+
+        vscode.window.showInformationMessage(message, { modal: true });
+    });
 	
 	const analyzeQueryCommand = vscode.commands.registerCommand('bigquery-previewer.analyzeQuery', async () => {
 		// If extension is paused, prompt to activate it
@@ -498,6 +554,7 @@ export function activate(context: vscode.ExtensionContext) {
 		startExtensionCommand,
 		pauseExtensionCommand,
 		showResultOptionsCommand,
+        showDryRunStatsCommand,
 		analyzeQueryCommand
 	);
 
