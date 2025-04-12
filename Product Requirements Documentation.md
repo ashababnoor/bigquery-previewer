@@ -26,7 +26,11 @@ BigQuery Previewer is a Visual Studio Code extension that helps developers analy
 ### 2.5 Triggering Mechanism  
 **R7.** The extension must support running the analysis manually via Command Palette (e.g., `BigQuery Previewer: Analyze Query`).  
 **R8.** The extension must allow defining a custom keyboard shortcut (keybinding) for quick analysis.  
-**R9.** The extension must support automatic analysis on file save (if enabled in settings).  
+**R9.** The extension must support automatic analysis on certain conditions.  
+  **R9.1.** Automatic analysis on file save (if enabled in settings).  
+  **R9.2.** Automatic analysis on file change (if enabled in settings).  
+    **R9.2.1.** When analyzing on file change, the extension must implement a configurable debounce mechanism to prevent excessive API calls during typing.  
+  **R9.3.** Automatic analysis on file open (if enabled in settings).  
 **R10.** The extension must provide a way to cancel an ongoing analysis if needed.  
 
 ## 3. Non-Functional Requirements
@@ -73,7 +77,10 @@ BigQuery Previewer is a Visual Studio Code extension that helps developers analy
   "bigqueryPreviewer.showScanWarnings": true,
   "bigqueryPreviewer.scanWarningThresholdMB": 100,
   "bigqueryPreviewer.autoRunOnSave": true,
+  "bigqueryPreviewer.autoRunOnChange": true,
+  "bigqueryPreviewer.autoRunOnOpen": true,
   "bigqueryPreviewer.enableStatusBar": true,
-  "bigqueryPreviewer.enableNotifications": false
+  "bigqueryPreviewer.enableNotifications": false,
+  "bigqueryPreviewer.changeDebounceDelayMs": 1500
 }
 ```
