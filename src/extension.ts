@@ -12,6 +12,7 @@ let waitTimeUntilNextRun: number = 5000; // 5 seconds
 const documentVersions = new Map<string, number>();
 let changeDebounceTimer: NodeJS.Timeout | undefined;
 let isExtensionActive = false; // Track if extension is active for analysis
+let closingDocuments = new Set<string>(); // Track documents that are being closed
 
 /**
  * Checks if the document has changed since last check (edited, saved, etc.)
@@ -121,7 +122,7 @@ export async function performDryRun(query: string): Promise<{ scannedBytes: numb
     }
 }
 
-async function analyzeQuery(document: vscode.TextDocument) {
+async function analyzeQuery(document: vscode.TextDocument, editor?: vscode.TextEditor) {
 	// Check if extension is active
 	if (!isExtensionActive) {
 		// Don't perform analysis if extension is paused
@@ -159,7 +160,19 @@ async function analyzeQuery(document: vscode.TextDocument) {
             vscode.window.showInformationMessage('Analyzing BigQuery SQL file...');
         }
 
-        const query = document.getText();
+        // Check if there's a selection in the editor
+        let query = document.getText();
+        let isSelectionAnalysis = false;
+        
+        // If editor is provided and has a non-empty selection, use the selected text
+        if (editor && !editor.selection.isEmpty) {
+            const selectedText = document.getText(editor.selection);
+            if (selectedText.trim().length > 0) {
+                query = selectedText;
+                isSelectionAnalysis = true;
+            }
+        }
+
         const { scannedBytes, errors } = await performDryRun(query);
 
         if (errors.length > 0) {
@@ -172,22 +185,25 @@ async function analyzeQuery(document: vscode.TextDocument) {
             }
         } else {
             const scannedMB = (scannedBytes / (1024 * 1024)).toFixed(2);
+            const selectionPrefix = isSelectionAnalysis ? '$(selection) Selection: ' : '';
 
             if (config.showScanWarnings && scannedBytes > config.scanWarningThresholdMB * 1024 * 1024) {
                 if (config.enableStatusBar) {
-                    updateStatusBar(`$(warning) Scan: ${scannedMB} MB (Warning)`, 
+                    updateStatusBar(`${selectionPrefix}$(warning) Scan: ${scannedMB} MB (Warning)`, 
                         new vscode.ThemeColor('statusBarItem.warningForeground'),
                         new vscode.ThemeColor('statusBarItem.warningBackground'));
                 } else {
-                    vscode.window.showWarningMessage(`Query analysis successful. Estimated scan size: ${scannedMB} MB exceeds the threshold.`);
+                    const selectionMsg = isSelectionAnalysis ? 'Selected text analysis' : 'Query analysis';
+                    vscode.window.showWarningMessage(`${selectionMsg} successful. Estimated scan size: ${scannedMB} MB exceeds the threshold.`);
                 }
             } else {
                 if (config.enableStatusBar) {
                     // Use consistent updateStatusBar function with green text
-                    updateStatusBar(`$(pass-filled) Scan: ${scannedMB} MB`, 
+                    updateStatusBar(`${selectionPrefix}$(pass-filled) Scan: ${scannedMB} MB`, 
                         new vscode.ThemeColor('bigqueryPreviewer.successForeground'));
                 } else {
-                    vscode.window.showInformationMessage(`Query analysis successful. Estimated scan size: ${scannedMB} MB.`);
+                    const selectionMsg = isSelectionAnalysis ? 'Selected text analysis' : 'Query analysis';
+                    vscode.window.showInformationMessage(`${selectionMsg} successful. Estimated scan size: ${scannedMB} MB.`);
                 }
             }
         }
@@ -227,7 +243,7 @@ export function activate(context: vscode.ExtensionContext) {
 		// Trigger analysis of current file if it's SQL
 		const editor = vscode.window.activeTextEditor;
 		if (editor && (editor.document.languageId === 'sql' || editor.document.fileName.endsWith('.sql'))) {
-			analyzeQuery(editor.document);
+			analyzeQuery(editor.document, editor);
 		}
 	});
 	
@@ -310,7 +326,7 @@ export function activate(context: vscode.ExtensionContext) {
 			return;
 		}
 
-		await analyzeQuery(editor.document);
+		await analyzeQuery(editor.document, editor);
 	});
 
 	context.subscriptions.push(
@@ -320,13 +336,41 @@ export function activate(context: vscode.ExtensionContext) {
 		analyzeQueryCommand
 	);
 
+	// Track when editors are about to be closed
+	vscode.window.onDidChangeVisibleTextEditors((editors) => {
+		// Detect which documents are no longer visible (potentially being closed)
+		const currentEditorUris = new Set(editors.map(editor => editor.document.uri.toString()));
+		
+		// Update our tracking set - we'll mark documents as closing when they disappear from visible editors
+		const previousEditorUris = new Set([...documentVersions.keys()]);
+		for (const uri of previousEditorUris) {
+			if (!currentEditorUris.has(uri)) {
+				// This document is no longer visible, mark it as closing
+				closingDocuments.add(uri);
+				// After 1 second, remove from the closing set (in case it reappears)
+				setTimeout(() => {
+					closingDocuments.delete(uri);
+				}, 1000);
+			}
+		}
+	});
+
 	// Event listener for file save (auto analysis if enabled and extension is active)
 	vscode.workspace.onDidSaveTextDocument(async (document) => {
         if (!isExtensionActive) return;
         
+        // Skip analysis if this document is being closed
+        const documentUri = document.uri.toString();
+        if (closingDocuments.has(documentUri)) {
+            console.log('Skipping analysis for document being closed:', documentUri);
+            return;
+        }
+        
         const config = getConfiguration();
         if (config.autoRunOnSave) {
-            await analyzeQuery(document);
+            // Get the editor for the saved document
+            const editor = vscode.window.visibleTextEditors.find(e => e.document.uri.toString() === document.uri.toString());
+            await analyzeQuery(document, editor);
         }
     });
     
@@ -343,7 +387,9 @@ export function activate(context: vscode.ExtensionContext) {
             
             // Set a new timer using the configured debounce delay
             changeDebounceTimer = setTimeout(async () => {
-                await analyzeQuery(event.document);
+                // Get the editor for the changed document
+                const editor = vscode.window.visibleTextEditors.find(e => e.document.uri.toString() === event.document.uri.toString());
+                await analyzeQuery(event.document, editor);
                 // Clear the timer reference once executed
                 changeDebounceTimer = undefined;
             }, config.changeDebounceDelayMs);
@@ -356,7 +402,9 @@ export function activate(context: vscode.ExtensionContext) {
         
         const config = getConfiguration();
         if (config.autoRunOnOpen && (document.languageId === 'sql' || document.fileName.endsWith('.sql'))) {
-            await analyzeQuery(document);
+            // Get the editor for the opened document
+            const editor = vscode.window.visibleTextEditors.find(e => e.document.uri.toString() === document.uri.toString());
+            await analyzeQuery(document, editor);
         }
     });
 }
