@@ -113,12 +113,13 @@ This extension contributes the following settings:
 | `bigqueryPreviewer.serviceAccountKeyPath` | Path to service account key file | `""` |
 | `bigqueryPreviewer.showScanWarnings` | Enable or disable scan warnings | `true` |
 | `bigqueryPreviewer.scanWarningThresholdMB` | Threshold for scan size warnings (MB) | `100` |
-| `bigqueryPreviewer.autoRunOnSave` | Automatically analyze on file save | `true` |
-| `bigqueryPreviewer.autoRunOnChange` | Automatically analyze on file content change | `true` |
-| `bigqueryPreviewer.changeDebounceDelayMs` | Delay in milliseconds to wait after typing stops before analyzing (when autoRunOnChange is enabled) | `1500` |
-| `bigqueryPreviewer.autoRunOnOpen` | Automatically analyze when opening a file | `true` |
-| `bigqueryPreviewer.enableStatusBar` | Enable or disable status bar feedback | `true` |
-| `bigqueryPreviewer.enableNotifications` | Enable or disable popup notifications | `false` |
+| `bigqueryPreviewer.autoRunOnSave` | Automatically analyze query when saving file | `true` |
+| `bigqueryPreviewer.autoRunOnChange` | Automatically analyze query when file content changes | `true` |
+| `bigqueryPreviewer.changeDebounceDelayMs` | Delay in milliseconds before analyzing after changes | `3000` |
+| `bigqueryPreviewer.autoRunOnOpen` | Automatically analyze query when opening a SQL file | `true` |
+| `bigqueryPreviewer.enableStatusBar` | Show analysis results in the status bar | `true` |
+| `bigqueryPreviewer.enableNotifications` | Show notifications for analysis results | `false` |
+| `bigqueryPreviewer.trackDryRuns` | Track the number and timing of dry run operations | `false` |
 
 ## Authentication
 
