@@ -1,5 +1,8 @@
 # BigQuery Previewer
 
+[![GitHub Repository](https://img.shields.io/badge/GitHub-Repository-blue?logo=github)](https://github.com/ashababnoor/bigquery-previewer)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 BigQuery Previewer is a Visual Studio Code extension that helps developers analyze BigQuery SQL files before execution. It performs a **dry run** of the query using the BigQuery API to detect potential issues such as high data scan volume and query errors — without actually executing the query. This tool enables safer and more cost-aware SQL development directly from within VS Code.
 
 ## Features
@@ -57,10 +60,11 @@ BigQuery Previewer is a Visual Studio Code extension that helps developers analy
 
 ### Interactive Status Bar
 - **Control Button**: Shows the current state of the extension (active or paused) and allows toggling between states.
-- **Result Display**: Shows analysis results with color coding (green text for success, yellow background for warnings, red background for errors).
-- **Result Options**: Click on any result to access a menu where you can:
-  - Pause the extension
-  - Hide the current result (until the next analysis is run)
+- **Result Display**: Shows analysis results with color coding and intuitive icons
+- **Result Options**: Click on any result to access a context-aware menu with relevant options:
+  - When active: Option to pause the extension
+  - When paused: Option to start the extension
+  - Option to hide the current result (only shown when results are visible)
 
 ### Manual Analysis
 - Run the command `BigQuery Previewer: Analyze Query` from the Command Palette (`Cmd+Shift+P` or `Ctrl+Shift+P`).
@@ -113,7 +117,7 @@ gcloud auth application-default login
 
 ## Release Notes
 
-### 0.0.1 - April 2025
+### 1.0.0 - April 2025
 
 - Initial release with dry run, scan estimation, and error detection features
 - Automatic analysis on file save, file changes, and file open
