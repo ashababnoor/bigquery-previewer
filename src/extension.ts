@@ -552,6 +552,13 @@ export function activate(context: vscode.ExtensionContext) {
 		await analyzeQuery(editor.document, editor);
 	});
 
+	// Add selection change event listener
+	context.subscriptions.push(
+		vscode.window.onDidChangeTextEditorSelection(event => {
+			handleSelectionChange(event.textEditor);
+		})
+	);
+
 	context.subscriptions.push(
 		startExtensionCommand,
 		pauseExtensionCommand,
