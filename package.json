@@ -11,6 +11,10 @@
   ],
   "activationEvents": [],
   "main": "./dist/extension.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ashababnoor/bigquery-previewer.git"
+  },
   "contributes": {
     "commands": [
       {
