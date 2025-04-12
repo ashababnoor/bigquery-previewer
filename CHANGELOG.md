@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Visual indication in status bar when analyzing a selection vs. the entire file
 - Hover support for error messages: Full error details now appear when hovering over the status bar
 - "View Full Error" option when clicking on error messages in status bar
+- Automatic data size formatting: Scan sizes now show as KB, MB, GB, or TB as appropriate
 
 ### Changed
 - Improved performance: Skip analysis when closing files, even if they're being saved during closure
