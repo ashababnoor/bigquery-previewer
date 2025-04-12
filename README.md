@@ -83,6 +83,7 @@ code --install-extension shabab.bigquery-previewer
 ### Manual Analysis
 - Run the command `BigQuery Previewer: Analyze Query` from the Command Palette (`Cmd+Shift+P` or `Ctrl+Shift+P`).
 - If the extension is paused, you'll be prompted to activate it first.
+- **Selection Analysis**: When you select a portion of your SQL file, only the selected text will be analyzed instead of the entire file. The status bar will show a "Selection:" prefix to indicate partial analysis.
 - Customize a keyboard shortcut for frequent use.
 
 ### Automatic Analysis
@@ -90,6 +91,7 @@ When the extension is active, it analyzes SQL files:
 - When opening a SQL file (if `autoRunOnOpen` is enabled)
 - When saving a SQL file (if `autoRunOnSave` is enabled)
 - When making changes to a SQL file (if `autoRunOnChange` is enabled)
+- If you have text selected, automatic analysis will use your current selection
 
 These automatic behaviors can be enabled or disabled in settings.
 
