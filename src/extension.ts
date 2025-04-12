@@ -23,6 +23,7 @@ function getConfiguration() {
         autoRunOnSave: config.get<boolean>('autoRunOnSave', true),
         enableStatusBar: config.get<boolean>('enableStatusBar', true),
         enableNotifications: config.get<boolean>('enableNotifications', false),
+        showScanWarnings: config.get<boolean>('showScanWarnings', true),
     };
 }
 
@@ -104,6 +105,8 @@ export function activate(context: vscode.ExtensionContext) {
 
         const { scannedBytes, errors } = await performDryRun(query);
 
+        const showScanWarnings = config.showScanWarnings;
+
         if (errors.length > 0) {
             if (config.enableStatusBar) {
                 updateStatusBar('Error in query analysis', new vscode.ThemeColor('statusBarItem.errorForeground'));
@@ -113,7 +116,7 @@ export function activate(context: vscode.ExtensionContext) {
         } else {
             const scannedMB = (scannedBytes / (1024 * 1024)).toFixed(2);
 
-            if (scannedBytes > config.scanWarningThresholdMB * 1024 * 1024) {
+            if (showScanWarnings && scannedBytes > config.scanWarningThresholdMB * 1024 * 1024) {
                 if (config.enableStatusBar) {
                     updateStatusBar(`Scan size: ${scannedMB} MB (Warning)`, new vscode.ThemeColor('statusBarItem.warningForeground'));
                 } else {
