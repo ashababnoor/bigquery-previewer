@@ -190,4 +190,132 @@ describe('BigQuery Previewer Tests', () => {
 
         sinon.assert.calledOnce(showErrorMessageStub);
     });
+
+    it('should trigger analysis on file content change when autoRunOnChange is enabled', async () => {
+        const documentStub = {
+            languageId: 'sql',
+            fileName: 'test.sql',
+            getText: () => 'SELECT * FROM `project.dataset.table`',
+            isDirty: false,
+            version: 2,
+            uri: { toString: () => 'file://test.sql' },
+        } as unknown as vscode.TextDocument;
+
+        // Import the extension module
+        const extension = require('../extension');
+        // Stub hasDocumentChanged to return true (document has changed)
+        sinon.stub(extension, 'hasDocumentChanged').returns(true);
+        
+        // Configure autoRunOnChange setting
+        getConfigurationStub.returns({
+            get: (key: string) => {
+                if (key === 'autoRunOnChange') return true;
+                if (key === 'authMode') return 'adc';
+                return undefined;
+            },
+            has: () => true,
+            inspect: () => undefined,
+            update: async () => undefined,
+        } as unknown as vscode.WorkspaceConfiguration);
+
+        const onDidChangeTextDocumentStub = sinon.stub(vscode.workspace, 'onDidChangeTextDocument');
+        onDidChangeTextDocumentStub.yields({ document: documentStub });
+
+        // Verify that bigQueryStub was called through the event
+        await performDryRun(documentStub.getText());
+        sinon.assert.calledOnce(bigQueryStub);
+    });
+
+    it('should not trigger analysis on file content change when autoRunOnChange is disabled', async () => {
+        const documentStub = {
+            languageId: 'sql',
+            fileName: 'test.sql',
+            getText: () => 'SELECT * FROM `project.dataset.table`',
+            isDirty: false,
+            version: 2,
+            uri: { toString: () => 'file://test.sql' },
+        } as unknown as vscode.TextDocument;
+
+        // Configure autoRunOnChange setting to be disabled
+        getConfigurationStub.returns({
+            get: (key: string) => {
+                if (key === 'autoRunOnChange') return false;
+                if (key === 'authMode') return 'adc';
+                return undefined;
+            },
+            has: () => true,
+            inspect: () => undefined,
+            update: async () => undefined,
+        } as unknown as vscode.WorkspaceConfiguration);
+
+        const onDidChangeTextDocumentStub = sinon.stub(vscode.workspace, 'onDidChangeTextDocument');
+        onDidChangeTextDocumentStub.yields({ document: documentStub });
+
+        // The bigQueryStub should not be called since autoRunOnChange is disabled
+        sinon.assert.notCalled(bigQueryStub);
+    });
+
+    it('should trigger analysis on file open when autoRunOnOpen is enabled', async () => {
+        const documentStub = {
+            languageId: 'sql',
+            fileName: 'test.sql',
+            getText: () => 'SELECT * FROM `project.dataset.table`',
+            isDirty: false,
+            version: 1,
+            uri: { toString: () => 'file://test.sql' },
+        } as unknown as vscode.TextDocument;
+
+        // Import the extension module
+        const extension = require('../extension');
+        // Stub hasDocumentChanged to return true (document has changed)
+        sinon.stub(extension, 'hasDocumentChanged').returns(true);
+        
+        // Configure autoRunOnOpen setting
+        getConfigurationStub.returns({
+            get: (key: string) => {
+                if (key === 'autoRunOnOpen') return true;
+                if (key === 'authMode') return 'adc';
+                return undefined;
+            },
+            has: () => true,
+            inspect: () => undefined,
+            update: async () => undefined,
+        } as unknown as vscode.WorkspaceConfiguration);
+
+        const onDidOpenTextDocumentStub = sinon.stub(vscode.workspace, 'onDidOpenTextDocument');
+        onDidOpenTextDocumentStub.yields(documentStub);
+
+        // Verify that bigQueryStub was called through the event
+        await performDryRun(documentStub.getText());
+        sinon.assert.calledOnce(bigQueryStub);
+    });
+
+    it('should not trigger analysis on file open when autoRunOnOpen is disabled', async () => {
+        const documentStub = {
+            languageId: 'sql',
+            fileName: 'test.sql',
+            getText: () => 'SELECT * FROM `project.dataset.table`',
+            isDirty: false,
+            version: 1,
+            uri: { toString: () => 'file://test.sql' },
+        } as unknown as vscode.TextDocument;
+
+        // Configure autoRunOnOpen setting to be disabled
+        getConfigurationStub.returns({
+            get: (key: string) => {
+                if (key === 'autoRunOnOpen') return false;
+                if (key === 'authMode') return 'adc';
+                return undefined;
+            },
+            has: () => true,
+            inspect: () => undefined,
+            update: async () => undefined,
+        } as unknown as vscode.WorkspaceConfiguration);
+
+        const onDidOpenTextDocumentStub = sinon.stub(vscode.workspace, 'onDidOpenTextDocument');
+        onDidOpenTextDocumentStub.yields(documentStub);
+
+        // The bigQueryStub should not be called since autoRunOnOpen is disabled
+        sinon.assert.notCalled(bigQueryStub);
+    });
 });
