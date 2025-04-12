@@ -5,6 +5,14 @@ All notable changes to the "BigQuery Previewer" extension will be documented in 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+### Added
+- Selection Analysis: When text is selected in a SQL file, only the selected portion will be analyzed instead of the entire file
+- Visual indication in status bar when analyzing a selection vs. the entire file
+
+### Changed
+- Improved performance: Skip analysis when closing files, even if they're being saved during closure
+
 ## [1.0.0] - 2025-04-12
 
 ### Added
@@ -36,3 +44,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - UI feedback preferences
 
 [1.0.0]: https://github.com/ashababnoor/bigquery-previewer/releases/tag/v1.0.0
+[Unreleased]: https://github.com/ashababnoor/bigquery-previewer/compare/v1.0.0...HEAD
