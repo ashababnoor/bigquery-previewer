@@ -16,6 +16,14 @@ let closingDocuments = new Set<string>(); // Track documents that are being clos
 const savingDocuments = new Map<string, NodeJS.Timeout>(); // Track documents being saved to detect save-on-close
 let lastFullErrorMessage: string | null = null; // Store the last full error message for viewing
 
+// Variables for selection analysis
+const SELECTION_DELAY = 750; // 750ms delay before analyzing a selection
+let selectionAnalysisTimer: NodeJS.Timeout | undefined; // Timer for delayed selection analysis
+let lastSelection: { editor: vscode.TextEditor; selection: vscode.Selection; timestamp: number } | undefined; // Track last selection
+let selectionTriggerCount = 0; // Count selection trigger events to prevent excessive analysis
+const MAX_SELECTION_TRIGGERS = 5; // Maximum number of selection events allowed in quick succession
+const SELECTION_TRIGGER_RESET_TIME = 1500; // Time in ms to reset the trigger count
+
 /**
  * Formats data size in bytes to a human-readable string (KB, MB, GB, TB)
  * @param bytes The size in bytes to format
@@ -281,6 +289,86 @@ async function analyzeQuery(document: vscode.TextDocument, editor?: vscode.TextE
     isRunning = false;
 }
 
+/**
+ * Handles selection changes with a stabilization delay to prevent excessive analysis
+ * Will only analyze a selection after it remains unchanged for SELECTION_DELAY milliseconds
+ * @param editor The text editor with the selection change
+ */
+function handleSelectionChange(editor: vscode.TextEditor): void {
+    if (!isExtensionActive || !editor || !isEligibleForAnalysis(editor.document)) {
+        return;
+    }
+    
+    const config = getConfiguration();
+    if (!config.enableStatusBar && !config.enableNotifications) {
+        return; // No feedback mechanism enabled
+    }
+    
+    // Track selection trigger count to prevent excessive analysis
+    selectionTriggerCount++;
+    
+    // If we've hit the limit, wait before enabling more triggers
+    if (selectionTriggerCount > MAX_SELECTION_TRIGGERS) {
+        console.log('Too many selection changes detected. Waiting before enabling more selection triggers.');
+        setTimeout(() => {
+            selectionTriggerCount = 0;
+        }, SELECTION_TRIGGER_RESET_TIME);
+        return;
+    }
+    
+    // Cancel any pending selection analysis
+    if (selectionAnalysisTimer) {
+        clearTimeout(selectionAnalysisTimer);
+        selectionAnalysisTimer = undefined;
+    }
+    
+    // If selection is empty, don't schedule an analysis
+    if (editor.selection.isEmpty) {
+        lastSelection = undefined;
+        return;
+    }
+    
+    const currentSelection = editor.selection;
+    const currentTime = Date.now();
+    
+    // Store current selection
+    lastSelection = {
+        editor,
+        selection: currentSelection,
+        timestamp: currentTime
+    };
+    
+    // Schedule a new analysis after the stabilization delay
+    selectionAnalysisTimer = setTimeout(async () => {
+        // Verify the selection is still valid and unchanged
+        const activeEditor = vscode.window.activeTextEditor;
+        if (
+            activeEditor &&
+            activeEditor === lastSelection?.editor &&
+            activeEditor.document === editor.document &&
+            areSelectionsEqual(activeEditor.selection, lastSelection.selection)
+        ) {
+            await analyzeQuery(editor.document, editor);
+        }
+        selectionAnalysisTimer = undefined;
+    }, SELECTION_DELAY);
+}
+
+/**
+ * Compares two selections for equality
+ * @param a First selection
+ * @param b Second selection
+ * @returns true if selections are equal, false otherwise
+ */
+function areSelectionsEqual(a: vscode.Selection, b: vscode.Selection): boolean {
+    return (
+        a.anchor.line === b.anchor.line &&
+        a.anchor.character === b.anchor.character &&
+        a.active.line === b.active.line &&
+        a.active.character === b.active.character
+    );
+}
+
 // This method is called when your extension is activated
 export function activate(context: vscode.ExtensionContext) {
 	console.log('Congratulations, your extension "bigquery-previewer" is now active!');
@@ -516,6 +604,11 @@ export function activate(context: vscode.ExtensionContext) {
             const editor = vscode.window.visibleTextEditors.find(e => e.document.uri.toString() === document.uri.toString());
             await analyzeQuery(document, editor);
         }
+    });
+
+    // Event listener for selection change
+    vscode.window.onDidChangeTextEditorSelection((event) => {
+        handleSelectionChange(event.textEditor);
     });
 }
 
