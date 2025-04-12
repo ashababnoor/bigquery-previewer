@@ -12,17 +12,25 @@ Find the extension on the [VS Code Marketplace](https://marketplace.visualstudio
 - **Dry Run Execution**: Analyze BigQuery SQL files without executing them.
 - **Scan Estimation**: Fetch and display the total estimated bytes scanned by the query.
 - **Error Detection**: Identify syntax or semantic errors in queries.
+- **Selection Analysis**: Select specific parts of SQL files for targeted analysis.
 - **Interactive UI Controls**:
   - Start/pause analysis via status bar button or command palette
   - Interactive result display with options to pause or hide results
+  - Hover over messages for detailed information
 - **Multiple Triggering Mechanisms**:
   - Analyze queries manually via Command Palette
   - Set custom keyboard shortcuts for quick analysis
   - Automatically analyze on file save
   - Automatically analyze on file content changes (with configurable debounce delay)
   - Automatically analyze when opening SQL files
-- **Intelligent Analysis**: Avoids redundant analysis of unchanged content within a specified time window.
-- **Status Bar Integration**: Real-time feedback with color coding (green for success, yellow for warnings, red for errors).
+  - Automatically analyze selected text after selection stabilizes (with configurable delay)
+- **Intelligent Analysis**: 
+  - Avoids redundant analysis of unchanged content within a specified time window
+  - Cancels pending selection analysis if selection changes
+- **Status Bar Integration**: 
+  - Real-time feedback with color coding (green for success, yellow for warnings, red for errors)
+  - Visual distinction between full-file analysis and selection-based analysis
+  - Automatic data size formatting (KB, MB, GB, or TB as appropriate)
 - **Configurable Settings**: Customize thresholds, toggle features, and control automatic analysis behavior.
 
 ## Requirements
