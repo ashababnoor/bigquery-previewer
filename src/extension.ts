@@ -4,11 +4,13 @@ import * as vscode from 'vscode';
 import { BigQuery } from '@google-cloud/bigquery';
 
 let statusBarItem: vscode.StatusBarItem;
+let resultStatusBarItem: vscode.StatusBarItem; // New status bar item for displaying results
 let lastRunTime: number | null = null;
 let isRunning = false;
 let waitTimeUntilNextRun: number = 5000; // 5 seconds
 const documentVersions = new Map<string, number>();
 let changeDebounceTimer: NodeJS.Timeout | undefined;
+let isExtensionActive = false; // Track if extension is active for analysis
 
 /**
  * Checks if the document has changed since last check (edited, saved, etc.)
@@ -25,21 +27,45 @@ export function hasDocumentChanged(document: vscode.TextDocument): boolean {
   
 	documentVersions.set(uri, currentVersion);
 	return true; // Change detected
-  }
+}
 
 function updateStatusBar(message: string, color: vscode.ThemeColor, backgroundColor?: vscode.ThemeColor) {
-    if (!statusBarItem) {
-        statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left);
-        statusBarItem.show();
+    if (!resultStatusBarItem) {
+        resultStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 99);
+        resultStatusBarItem.command = 'bigquery-previewer.showResultOptions';
+        resultStatusBarItem.show();
     }
-    statusBarItem.text = message;
-    statusBarItem.color = color;
+    resultStatusBarItem.text = message;
+    resultStatusBarItem.color = color;
     
     // Set the background color if provided
     if (backgroundColor) {
-        statusBarItem.backgroundColor = backgroundColor;
+        resultStatusBarItem.backgroundColor = backgroundColor;
     } else {
-        statusBarItem.backgroundColor = undefined; // Reset to default if not specified
+        resultStatusBarItem.backgroundColor = undefined; // Reset to default if not specified
+    }
+}
+
+function hideResultStatusBar() {
+    if (resultStatusBarItem) {
+        resultStatusBarItem.hide();
+    }
+}
+
+function updateControlStatusBar() {
+    if (!statusBarItem) {
+        statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100);
+        statusBarItem.show();
+    }
+    
+    if (isExtensionActive) {
+        statusBarItem.text = "$(debug-pause) BigQuery Previewer";
+        statusBarItem.tooltip = "Click to pause BigQuery Previewer";
+        statusBarItem.command = 'bigquery-previewer.pauseExtension';
+    } else {
+        statusBarItem.text = "$(debug-start) BigQuery Previewer";
+        statusBarItem.tooltip = "Click to activate BigQuery Previewer";
+        statusBarItem.command = 'bigquery-previewer.startExtension';
     }
 }
 
@@ -90,6 +116,12 @@ export async function performDryRun(query: string): Promise<{ scannedBytes: numb
 }
 
 async function analyzeQuery(document: vscode.TextDocument) {
+	// Check if extension is active
+	if (!isExtensionActive) {
+		// Don't perform analysis if extension is paused
+		return;
+	}
+
 	// Guard clause to check if the document is available
 	if (!document) {
 		vscode.window.showErrorMessage('No active editor found. Please open a .sql file to analyze.');
@@ -146,9 +178,9 @@ async function analyzeQuery(document: vscode.TextDocument) {
             } else {
                 if (config.enableStatusBar) {
                     // Use green text color for success (no background color change)
-                    statusBarItem.text = `Scan: ${scannedMB} MB`;
-                    statusBarItem.color = new vscode.ThemeColor('bigqueryPreviewer.successForeground');
-                    statusBarItem.backgroundColor = undefined; // No background color for success
+                    resultStatusBarItem.text = `Scan: ${scannedMB} MB`;
+                    resultStatusBarItem.color = new vscode.ThemeColor('bigqueryPreviewer.successForeground');
+                    resultStatusBarItem.backgroundColor = undefined; // No background color for success
                 } else {
                     vscode.window.showInformationMessage(`Query analysis successful. Estimated scan size: ${scannedMB} MB.`);
                 }
@@ -161,19 +193,65 @@ async function analyzeQuery(document: vscode.TextDocument) {
 }
 
 // This method is called when your extension is activated
-// Your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
-
-	// Use the console to output diagnostic information (console.log) and errors (console.error)
-	// This line of code will only be executed once when your extension is activated
 	console.log('Congratulations, your extension "bigquery-previewer" is now active!');
 
-	// The command has been defined in the package.json file
-	// Now provide the implementation of the command with registerCommand
-	// The commandId parameter must match the command field in package.json
+	// Initialize status bar in inactive state
+	isExtensionActive = false;
+	updateControlStatusBar();
 
-	// Register the command for manual analysis
+	// Register commands
+	const startExtensionCommand = vscode.commands.registerCommand('bigquery-previewer.startExtension', () => {
+		isExtensionActive = true;
+		updateControlStatusBar();
+		vscode.window.showInformationMessage('BigQuery Previewer is now active. SQL files will be automatically analyzed.');
+		
+		// Trigger analysis of current file if it's SQL
+		const editor = vscode.window.activeTextEditor;
+		if (editor && (editor.document.languageId === 'sql' || editor.document.fileName.endsWith('.sql'))) {
+			analyzeQuery(editor.document);
+		}
+	});
+	
+	const pauseExtensionCommand = vscode.commands.registerCommand('bigquery-previewer.pauseExtension', () => {
+		isExtensionActive = false;
+		updateControlStatusBar();
+		vscode.window.showInformationMessage('BigQuery Previewer is now paused. No automatic analysis will occur.');
+	});
+	
+	const showResultOptionsCommand = vscode.commands.registerCommand('bigquery-previewer.showResultOptions', async () => {
+		const selected = await vscode.window.showQuickPick([
+			{ label: '$(debug-pause) Pause', description: 'Pause BigQuery Previewer' },
+			{ label: '$(eye-closed) Hide', description: 'Hide this result' }
+		], {
+			placeHolder: 'Select an action for BigQuery Previewer'
+		});
+		
+		if (selected) {
+			if (selected.label.includes('Pause')) {
+				vscode.commands.executeCommand('bigquery-previewer.pauseExtension');
+			} else if (selected.label.includes('Hide')) {
+				hideResultStatusBar();
+			}
+		}
+	});
+	
 	const analyzeQueryCommand = vscode.commands.registerCommand('bigquery-previewer.analyzeQuery', async () => {
+		// If extension is paused, prompt to activate it
+		if (!isExtensionActive) {
+			const action = await vscode.window.showInformationMessage(
+				'BigQuery Previewer is paused. Do you want to activate it and analyze the current query?',
+				'Activate', 'Cancel'
+			);
+			
+			if (action !== 'Activate') {
+				return;
+			}
+			
+			isExtensionActive = true;
+			updateControlStatusBar();
+		}
+		
 		const editor = vscode.window.activeTextEditor;
 		if (!editor) {
 			vscode.window.showErrorMessage('No active editor found. Please open a .sql file to analyze.');
@@ -183,18 +261,27 @@ export function activate(context: vscode.ExtensionContext) {
 		await analyzeQuery(editor.document);
 	});
 
-	context.subscriptions.push(analyzeQueryCommand);
+	context.subscriptions.push(
+		startExtensionCommand,
+		pauseExtensionCommand,
+		showResultOptionsCommand,
+		analyzeQueryCommand
+	);
 
-	// Event listener for file save (auto analysis if enabled)
+	// Event listener for file save (auto analysis if enabled and extension is active)
 	vscode.workspace.onDidSaveTextDocument(async (document) => {
+        if (!isExtensionActive) return;
+        
         const config = getConfiguration();
         if (config.autoRunOnSave) {
             await analyzeQuery(document);
         }
     });
     
-    // Event listener for file change (auto analysis if enabled)
+    // Event listener for file change (auto analysis if enabled and extension is active)
     vscode.workspace.onDidChangeTextDocument(async (event) => {
+        if (!isExtensionActive) return;
+        
         const config = getConfiguration();
         if (config.autoRunOnChange && (event.document.languageId === 'sql' || event.document.fileName.endsWith('.sql'))) {
             // Clear any existing timer to implement debouncing
@@ -211,8 +298,10 @@ export function activate(context: vscode.ExtensionContext) {
         }
     });
     
-    // Event listener for file open (auto analysis if enabled)
+    // Event listener for file open (auto analysis if enabled and extension is active)
     vscode.workspace.onDidOpenTextDocument(async (document) => {
+        if (!isExtensionActive) return;
+        
         const config = getConfiguration();
         if (config.autoRunOnOpen && (document.languageId === 'sql' || document.fileName.endsWith('.sql'))) {
             await analyzeQuery(document);
