@@ -12,6 +12,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Hover support for error messages: Full error details now appear when hovering over the status bar
 - "View Full Error" option when clicking on error messages in status bar
 - Automatic data size formatting: Scan sizes now show as KB, MB, GB, or TB as appropriate
+- Auto-analysis on text selection: SQL queries are automatically analyzed when text is selected (with rate limiting)
+- Delayed selection analysis: Waits for selections to stabilize before analysis and cancels if selection is removed
 
 ### Changed
 - Improved performance: Skip analysis when closing files, even if they're being saved during closure
