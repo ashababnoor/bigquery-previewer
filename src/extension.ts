@@ -99,6 +99,11 @@ async function analyzeQuery(document: vscode.TextDocument) {
 		return;
 	}
 
+	if (!config.enableStatusBar && !config.enableNotifications) {
+		vscode.window.showWarningMessage('Both status bar and notifications are disabled. Please enable at least one to receive feedback. Query analysis not performed.');
+		return;
+	}
+
     isRunning = true;
     if (document.languageId === 'sql' || document.fileName.endsWith('.sql')) {
         if (config.enableStatusBar) {
