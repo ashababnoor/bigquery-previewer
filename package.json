@@ -55,6 +55,16 @@
           "default": true,
           "description": "Automatically analyze queries on file save."
         },
+        "bigqueryPreviewer.autoRunOnChange": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically analyze queries when file content changes."
+        },
+        "bigqueryPreviewer.autoRunOnOpen": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically analyze queries when an SQL file is opened."
+        },
         "bigqueryPreviewer.enableStatusBar": {
           "type": "boolean",
           "default": true,
@@ -64,6 +74,13 @@
           "type": "boolean",
           "default": false,
           "description": "Enable or disable popup notifications for warnings and errors."
+        },
+        "bigqueryPreviewer.changeDebounceDelayMs": {
+          "type": "number",
+          "default": 1500,
+          "minimum": 100,
+          "maximum": 10000,
+          "description": "Delay in milliseconds to wait after typing stops before analyzing the query on file change."
         }
       }
     }
