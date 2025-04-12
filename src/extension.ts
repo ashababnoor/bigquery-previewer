@@ -32,6 +32,15 @@ export function hasDocumentChanged(document: vscode.TextDocument): boolean {
 	return true; // Change detected
 }
 
+/**
+ * Checks if a document is eligible for analysis (is a SQL file)
+ * @param document The TextDocument to check
+ * @returns true if the document is eligible for analysis (SQL file), false otherwise
+ */
+function isEligibleForAnalysis(document: vscode.TextDocument): boolean {
+    return document.languageId === 'sql' || document.fileName.endsWith('.sql');
+}
+
 function updateStatusBar(message: string, color: vscode.ThemeColor, backgroundColor?: vscode.ThemeColor) {
     if (!resultStatusBarItem) {
         resultStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 99);
@@ -152,7 +161,7 @@ async function analyzeQuery(document: vscode.TextDocument, editor?: vscode.TextE
 	}
 
     isRunning = true;
-    if (document.languageId === 'sql' || document.fileName.endsWith('.sql')) {
+    if (isEligibleForAnalysis(document)) {
         if (config.enableStatusBar) {
             updateStatusBar('Analyzing...', 
                 new vscode.ThemeColor('statusBarItem.foreground'),
@@ -244,7 +253,7 @@ export function activate(context: vscode.ExtensionContext) {
 		
 		// Trigger analysis of current file if it's SQL
 		const editor = vscode.window.activeTextEditor;
-		if (editor && (editor.document.languageId === 'sql' || editor.document.fileName.endsWith('.sql'))) {
+		if (editor && isEligibleForAnalysis(editor.document)) {
 			analyzeQuery(editor.document, editor);
 		}
 	});
@@ -345,7 +354,7 @@ export function activate(context: vscode.ExtensionContext) {
 		const uri = e.document.uri.toString();
 		// When a document is about to be saved, mark it as potentially closing
 		// and start a short timeout
-		if (e.document.languageId === 'sql' || e.document.fileName.endsWith('.sql')) {
+		if (isEligibleForAnalysis(e.document)) {
 			// Clear any existing timer
 			const existingTimer = savingDocuments.get(uri);
 			if (existingTimer) {
@@ -415,7 +424,7 @@ export function activate(context: vscode.ExtensionContext) {
         if (!isExtensionActive) return;
         
         const config = getConfiguration();
-        if (config.autoRunOnChange && (event.document.languageId === 'sql' || event.document.fileName.endsWith('.sql'))) {
+        if (config.autoRunOnChange && isEligibleForAnalysis(event.document)) {
             // Clear any existing timer to implement debouncing
             if (changeDebounceTimer) {
                 clearTimeout(changeDebounceTimer);
@@ -437,7 +446,7 @@ export function activate(context: vscode.ExtensionContext) {
         if (!isExtensionActive) return;
         
         const config = getConfiguration();
-        if (config.autoRunOnOpen && (document.languageId === 'sql' || document.fileName.endsWith('.sql'))) {
+        if (config.autoRunOnOpen && isEligibleForAnalysis(document)) {
             // Get the editor for the opened document
             const editor = vscode.window.visibleTextEditors.find(e => e.document.uri.toString() === document.uri.toString());
             await analyzeQuery(document, editor);
