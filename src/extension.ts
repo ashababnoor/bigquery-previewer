@@ -8,7 +8,8 @@ let resultStatusBarItem: vscode.StatusBarItem; // New status bar item for displa
 let isResultStatusBarVisible = false; // Track visibility state manually
 let lastRunTime: number | null = null;
 let isRunning = false;
-let waitTimeUntilNextRun: number = 5000; // 5 seconds
+const defaultWaitTimeUntilNextRun: number = 5000; // 5 seconds
+const waitTimeUntilNextRunForOnChange: number = 10000; // 10 seconds for onChange event
 const documentVersions = new Map<string, number>();
 let changeDebounceTimer: NodeJS.Timeout | undefined;
 let isExtensionActive = false; // Track if extension is active for analysis
@@ -198,7 +199,7 @@ export async function performDryRun(query: string): Promise<{ scannedBytes: numb
     }
 }
 
-async function analyzeQuery(document: vscode.TextDocument, editor?: vscode.TextEditor) {
+async function analyzeQuery(document: vscode.TextDocument, editor?: vscode.TextEditor, waitTimeUntilNextRun?: number) {
 	// Check if extension is active
 	if (!isExtensionActive) {
 		// Don't perform analysis if extension is paused
@@ -213,7 +214,8 @@ async function analyzeQuery(document: vscode.TextDocument, editor?: vscode.TextE
 
 	const config = getConfiguration();
     const currentTime = Date.now();
-	const waitTimeElapsed = lastRunTime && (currentTime - lastRunTime > waitTimeUntilNextRun);
+	const waitTimeToUse = waitTimeUntilNextRun ?? defaultWaitTimeUntilNextRun;
+	const waitTimeElapsed = lastRunTime && (currentTime - lastRunTime > waitTimeToUse);
 	const isDocumentChanged = hasDocumentChanged(document);
 
 	if (!waitTimeElapsed && !isDocumentChanged) {
@@ -644,7 +646,7 @@ export function activate(context: vscode.ExtensionContext) {
             changeDebounceTimer = setTimeout(async () => {
                 // Get the editor for the changed document
                 const editor = vscode.window.visibleTextEditors.find(e => e.document.uri.toString() === event.document.uri.toString());
-                await analyzeQuery(event.document, editor);
+                await analyzeQuery(event.document, editor, waitTimeUntilNextRunForOnChange);
                 // Clear the timer reference once executed
                 changeDebounceTimer = undefined;
             }, config.changeDebounceDelayMs);
