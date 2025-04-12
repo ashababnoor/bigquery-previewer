@@ -227,12 +227,13 @@ export function activate(context: vscode.ExtensionContext) {
 		isExtensionActive = true;
 		updateControlStatusBar();
 		
-		 // Auto-dismissing message using standard VS Code API
+		// Auto-dismissing message using standard VS Code API
+		// Use cancellable: false to show an "X" button instead of "Cancel"
 		vscode.window.withProgress(
 			{
 				location: vscode.ProgressLocation.Notification,
 				title: 'BigQuery Previewer is now active. SQL files will be automatically analyzed.',
-				cancellable: true
+				cancellable: false
 			},
 			async (progress) => {
 				// Auto-dismiss after 3 seconds
@@ -258,12 +259,13 @@ export function activate(context: vscode.ExtensionContext) {
 			changeDebounceTimer = undefined;
 		}
 		
-		 // Auto-dismissing message using standard VS Code API
+		// Auto-dismissing message using standard VS Code API
+		// Use cancellable: false to show an "X" button instead of "Cancel"
 		vscode.window.withProgress(
 			{
 				location: vscode.ProgressLocation.Notification,
 				title: 'BigQuery Previewer is now paused. No automatic analysis will occur.',
-				cancellable: true
+				cancellable: false
 			},
 			async (progress) => {
 				// Auto-dismiss after 3 seconds
