@@ -33,54 +33,54 @@
             "service_account"
           ],
           "default": "adc",
-          "description": "Authentication mode for BigQuery (Application Default Credentials or Service Account)."
+          "description": "Authentication mode for BigQuery. Use `adc` for Application Default Credentials (requires gcloud auth) or `service_account` to use a service account key file."
         },
         "bigqueryPreviewer.serviceAccountKeyPath": {
           "type": "string",
           "default": "",
-          "description": "Path to the service account key file (if using service account authentication)."
+          "description": "Path to the service account key file (JSON). Only used when authMode is set to `service_account`."
         },
         "bigqueryPreviewer.showScanWarnings": {
           "type": "boolean",
           "default": true,
-          "description": "Enable or disable scan warnings when the scan size exceeds the threshold."
+          "description": "Show warnings when the scan size exceeds the threshold specified by `scanWarningThresholdMB`. When enabled, scan sizes above the threshold will be highlighted in the status bar (if enabled) or shown as warning popups."
         },
         "bigqueryPreviewer.scanWarningThresholdMB": {
           "type": "number",
           "default": 100,
-          "description": "Threshold for scan size warnings in MB."
+          "description": "Threshold in megabytes that triggers a warning when a query's scan size exceeds this value. Only applied when `showScanWarnings` is enabled."
         },
         "bigqueryPreviewer.autoRunOnSave": {
           "type": "boolean",
           "default": true,
-          "description": "Automatically analyze queries on file save."
+          "description": "Automatically analyze queries when a SQL file is saved. When disabled, you must use the command palette or keyboard shortcut to analyze queries."
         },
         "bigqueryPreviewer.autoRunOnChange": {
           "type": "boolean",
           "default": true,
-          "description": "Automatically analyze queries when file content changes."
+          "description": "Automatically analyze queries when an SQL file content changes, after the debounce delay specified by `changeDebounceDelayMs`. This avoids excessive API calls while typing."
         },
         "bigqueryPreviewer.autoRunOnOpen": {
           "type": "boolean",
           "default": true,
-          "description": "Automatically analyze queries when an SQL file is opened."
+          "description": "Automatically analyze queries when a SQL file is first opened in the editor."
         },
         "bigqueryPreviewer.enableStatusBar": {
           "type": "boolean",
           "default": true,
-          "description": "Enable or disable the status bar feedback."
+          "description": "Display the analysis results in the status bar. When both `enableStatusBar` and `enableNotifications` are enabled, the status bar will be given priority. When both are disabled, no analysis results will be shown."
         },
         "bigqueryPreviewer.enableNotifications": {
           "type": "boolean",
           "default": false,
-          "description": "Enable or disable popup notifications for warnings and errors."
+          "description": "Show popup notifications for analysis results. When both `enableStatusBar` and `enableNotifications` are enabled, the status bar will be given priority. When both are disabled, no analysis results will be shown."
         },
         "bigqueryPreviewer.changeDebounceDelayMs": {
           "type": "number",
           "default": 1500,
           "minimum": 100,
           "maximum": 10000,
-          "description": "Delay in milliseconds to wait after typing stops before analyzing the query on file change."
+          "description": "Delay in milliseconds to wait after typing stops before analyzing the query (when `autoRunOnChange` is enabled). Higher values reduce API calls but delay feedback."
         }
       }
     }
