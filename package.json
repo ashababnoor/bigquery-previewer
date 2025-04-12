@@ -16,8 +16,52 @@
       {
         "command": "bigquery-previewer.helloWorld",
         "title": "Hello World"
+      },
+      {
+        "command": "bigquery-previewer.analyzeQuery",
+        "title": "BigQuery Previewer: Analyze Query"
       }
-    ]
+    ],
+    "configuration": {
+      "type": "object",
+      "title": "BigQuery Previewer Configuration",
+      "properties": {
+        "bigqueryPreviewer.authMode": {
+          "type": "string",
+          "enum": [
+            "adc",
+            "service_account"
+          ],
+          "default": "adc",
+          "description": "Authentication mode for BigQuery (Application Default Credentials or Service Account)."
+        },
+        "bigqueryPreviewer.serviceAccountKeyPath": {
+          "type": "string",
+          "default": "",
+          "description": "Path to the service account key file (if using service account authentication)."
+        },
+        "bigqueryPreviewer.scanWarningThresholdMB": {
+          "type": "number",
+          "default": 100,
+          "description": "Threshold for scan size warnings in MB."
+        },
+        "bigqueryPreviewer.autoRunOnSave": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically analyze queries on file save."
+        },
+        "bigqueryPreviewer.enableStatusBar": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable or disable the status bar feedback."
+        },
+        "bigqueryPreviewer.enableNotifications": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enable or disable popup notifications for warnings and errors."
+        }
+      }
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run package",
@@ -34,16 +78,21 @@
     "test": "vscode-test"
   },
   "devDependencies": {
-    "@types/vscode": "^1.99.0",
     "@types/mocha": "^10.0.10",
     "@types/node": "20.x",
+    "@types/sinon": "^17.0.4",
+    "@types/vscode": "^1.99.0",
     "@typescript-eslint/eslint-plugin": "^8.28.0",
     "@typescript-eslint/parser": "^8.28.0",
-    "eslint": "^9.23.0",
-    "esbuild": "^0.25.1",
-    "npm-run-all": "^4.1.5",
-    "typescript": "^5.8.2",
     "@vscode/test-cli": "^0.0.10",
-    "@vscode/test-electron": "^2.4.1"
+    "@vscode/test-electron": "^2.4.1",
+    "esbuild": "^0.25.1",
+    "eslint": "^9.23.0",
+    "npm-run-all": "^4.1.5",
+    "sinon": "^20.0.0",
+    "typescript": "^5.8.2"
+  },
+  "dependencies": {
+    "@google-cloud/bigquery": "^6.0.0"
   }
 }
