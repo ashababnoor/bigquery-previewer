@@ -28,12 +28,13 @@ This extension contributes the following settings:
 
 ```json
 {
-  "bigqueryPreviewer.authMode": "adc", // or "service_account"
-  "bigqueryPreviewer.serviceAccountKeyPath": "/path/to/key.json",
-  "bigqueryPreviewer.scanWarningThresholdMB": 100,
-  "bigqueryPreviewer.autoRunOnSave": true,
-  "bigqueryPreviewer.enableStatusBar": true,
-  "bigqueryPreviewer.enableNotifications": false
+    "bigqueryPreviewer.authMode": "adc", // or "service_account"
+    "bigqueryPreviewer.serviceAccountKeyPath": "/path/to/key.json",
+    "bigqueryPreviewer.showScanWarnings": true,
+    "bigqueryPreviewer.scanWarningThresholdMB": 100,
+    "bigqueryPreviewer.autoRunOnSave": true,
+    "bigqueryPreviewer.enableStatusBar": true,
+    "bigqueryPreviewer.enableNotifications": false
 }
 ```
 
