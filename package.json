@@ -20,6 +20,18 @@
       {
         "command": "bigquery-previewer.analyzeQuery",
         "title": "BigQuery Previewer: Analyze Query"
+      },
+      {
+        "command": "bigquery-previewer.startExtension",
+        "title": "BigQuery Previewer: Start"
+      },
+      {
+        "command": "bigquery-previewer.pauseExtension",
+        "title": "BigQuery Previewer: Pause"
+      },
+      {
+        "command": "bigquery-previewer.showResultOptions",
+        "title": "BigQuery Previewer: Show Result Options"
       }
     ],
     "colors": [
