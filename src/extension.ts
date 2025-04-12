@@ -13,6 +13,7 @@ const documentVersions = new Map<string, number>();
 let changeDebounceTimer: NodeJS.Timeout | undefined;
 let isExtensionActive = false; // Track if extension is active for analysis
 let closingDocuments = new Set<string>(); // Track documents that are being closed
+const savingDocuments = new Map<string, NodeJS.Timeout>(); // Track documents being saved to detect save-on-close
 
 /**
  * Checks if the document has changed since last check (edited, saved, etc.)
@@ -336,33 +337,62 @@ export function activate(context: vscode.ExtensionContext) {
 		analyzeQueryCommand
 	);
 
-	// Track when editors are about to be closed
-	vscode.window.onDidChangeVisibleTextEditors((editors) => {
-		// Detect which documents are no longer visible (potentially being closed)
-		const currentEditorUris = new Set(editors.map(editor => editor.document.uri.toString()));
-		
-		// Update our tracking set - we'll mark documents as closing when they disappear from visible editors
-		const previousEditorUris = new Set([...documentVersions.keys()]);
-		for (const uri of previousEditorUris) {
-			if (!currentEditorUris.has(uri)) {
-				// This document is no longer visible, mark it as closing
-				closingDocuments.add(uri);
-				// After 1 second, remove from the closing set (in case it reappears)
-				setTimeout(() => {
-					closingDocuments.delete(uri);
-				}, 1000);
+	// Better file close detection
+	// 1. Listen for will-save events to detect potential save-on-close operations
+	context.subscriptions.push(vscode.workspace.onWillSaveTextDocument((e) => {
+		const uri = e.document.uri.toString();
+		// When a document is about to be saved, mark it as potentially closing
+		// and start a short timeout
+		if (e.document.languageId === 'sql' || e.document.fileName.endsWith('.sql')) {
+			// Clear any existing timer
+			const existingTimer = savingDocuments.get(uri);
+			if (existingTimer) {
+				clearTimeout(existingTimer);
 			}
+			
+			// Add to potentially closing documents
+			const timer = setTimeout(() => {
+				savingDocuments.delete(uri);
+				// If this document is still open after our timeout, it wasn't a save-on-close
+			}, 300); // Short timeout to detect save-on-close pattern
+			
+			savingDocuments.set(uri, timer);
 		}
-	});
+	}));
+	
+	// 2. Listen for document close events to identify definite closures
+	context.subscriptions.push(vscode.workspace.onDidCloseTextDocument((document) => {
+		const uri = document.uri.toString();
+		
+		// If this document was recently saved, it's likely a save-on-close operation
+		if (savingDocuments.has(uri)) {
+			// Add to our closing documents set to prevent analysis
+			closingDocuments.add(uri);
+			
+			// Clear the saving timer
+			const timer = savingDocuments.get(uri);
+			if (timer) {
+				clearTimeout(timer);
+			}
+			savingDocuments.delete(uri);
+			
+			console.log('Detected save-on-close for document:', uri);
+			
+			// Keep in the closing set a bit longer to catch any pending save operations
+			setTimeout(() => {
+				closingDocuments.delete(uri);
+			}, 1000); 
+		}
+	}));
 
 	// Event listener for file save (auto analysis if enabled and extension is active)
 	vscode.workspace.onDidSaveTextDocument(async (document) => {
         if (!isExtensionActive) return;
         
-        // Skip analysis if this document is being closed
+        // Skip analysis if this document is being closed or was recently in a save operation
         const documentUri = document.uri.toString();
-        if (closingDocuments.has(documentUri)) {
-            console.log('Skipping analysis for document being closed:', documentUri);
+        if (closingDocuments.has(documentUri) || savingDocuments.has(documentUri)) {
+            console.log('Skipping analysis for document being closed or in save-on-close operation:', documentUri);
             return;
         }
         
@@ -370,7 +400,11 @@ export function activate(context: vscode.ExtensionContext) {
         if (config.autoRunOnSave) {
             // Get the editor for the saved document
             const editor = vscode.window.visibleTextEditors.find(e => e.document.uri.toString() === document.uri.toString());
-            await analyzeQuery(document, editor);
+            
+            // Only analyze if we can find the editor (another indicator the file isn't being closed)
+            if (editor) {
+                await analyzeQuery(document, editor);
+            }
         }
     });
     
