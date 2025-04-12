@@ -169,7 +169,7 @@ async function analyzeQuery(document: vscode.TextDocument) {
 
             if (config.showScanWarnings && scannedBytes > config.scanWarningThresholdMB * 1024 * 1024) {
                 if (config.enableStatusBar) {
-                    updateStatusBar(`Scan: ${scannedMB} MB (Warning)`, 
+                    updateStatusBar(`$(warning) Scan: ${scannedMB} MB (Warning)`, 
                         new vscode.ThemeColor('statusBarItem.warningForeground'),
                         new vscode.ThemeColor('statusBarItem.warningBackground'));
                 } else {
@@ -177,10 +177,9 @@ async function analyzeQuery(document: vscode.TextDocument) {
                 }
             } else {
                 if (config.enableStatusBar) {
-                    // Use green text color for success (no background color change)
-                    resultStatusBarItem.text = `Scan: ${scannedMB} MB`;
-                    resultStatusBarItem.color = new vscode.ThemeColor('bigqueryPreviewer.successForeground');
-                    resultStatusBarItem.backgroundColor = undefined; // No background color for success
+                    // Use consistent updateStatusBar function with green text
+                    updateStatusBar(`$(pass-filled) Scan: ${scannedMB} MB`, 
+                        new vscode.ThemeColor('bigqueryPreviewer.successForeground'));
                 } else {
                     vscode.window.showInformationMessage(`Query analysis successful. Estimated scan size: ${scannedMB} MB.`);
                 }
@@ -216,6 +215,13 @@ export function activate(context: vscode.ExtensionContext) {
 	const pauseExtensionCommand = vscode.commands.registerCommand('bigquery-previewer.pauseExtension', () => {
 		isExtensionActive = false;
 		updateControlStatusBar();
+		
+		// Clear any pending analysis timers when pausing
+		if (changeDebounceTimer) {
+			clearTimeout(changeDebounceTimer);
+			changeDebounceTimer = undefined;
+		}
+		
 		vscode.window.showInformationMessage('BigQuery Previewer is now paused. No automatic analysis will occur.');
 	});
 	
@@ -310,4 +316,12 @@ export function activate(context: vscode.ExtensionContext) {
 }
 
 // This method is called when your extension is deactivated
-export function deactivate() {}
+export function deactivate() {
+    // Dispose of the status bar items to prevent memory leaks
+    if (statusBarItem) {
+        statusBarItem.dispose();
+    }
+    if (resultStatusBarItem) {
+        resultStatusBarItem.dispose();
+    }
+}
