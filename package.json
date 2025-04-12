@@ -44,6 +44,11 @@
           "default": "",
           "description": "Path to the service account key file (if using service account authentication)."
         },
+        "bigqueryPreviewer.showScanWarnings": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable or disable scan warnings when the scan size exceeds the threshold."
+        },
         "bigqueryPreviewer.scanWarningThresholdMB": {
           "type": "number",
           "default": 100,
