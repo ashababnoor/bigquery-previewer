@@ -24,13 +24,13 @@
     ],
     "colors": [
       {
-        "id": "bigqueryPreviewer.successBackground",
-        "description": "Background color for successful query analysis status",
+        "id": "bigqueryPreviewer.successForeground",
+        "description": "Text color for successful query analysis status",
         "defaults": {
-          "dark": "#2aa152",
-          "light": "#2aa152",
-          "highContrast": "#2aa152",
-          "highContrastLight": "#2aa152"
+          "dark": "#32CD32",
+          "light": "#388E3C",
+          "highContrast": "#66BB6A",
+          "highContrastLight": "#2C6B2F"
         }
       }
     ],

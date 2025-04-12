@@ -145,9 +145,10 @@ async function analyzeQuery(document: vscode.TextDocument) {
                 }
             } else {
                 if (config.enableStatusBar) {
-                    updateStatusBar(`Scan: ${scannedMB} MB`, 
-                        new vscode.ThemeColor('statusBarItem.foreground'),
-                        new vscode.ThemeColor('bigqueryPreviewer.successBackground')); // Using our custom green color
+                    // Use green text color for success (no background color change)
+                    statusBarItem.text = `Scan: ${scannedMB} MB`;
+                    statusBarItem.color = new vscode.ThemeColor('bigqueryPreviewer.successForeground');
+                    statusBarItem.backgroundColor = undefined; // No background color for success
                 } else {
                     vscode.window.showInformationMessage(`Query analysis successful. Estimated scan size: ${scannedMB} MB.`);
                 }
