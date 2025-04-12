@@ -7,44 +7,102 @@ BigQuery Previewer is a Visual Studio Code extension that helps developers analy
 - **Dry Run Execution**: Analyze BigQuery SQL files without executing them.
 - **Scan Estimation**: Fetch and display the total estimated bytes scanned by the query.
 - **Error Detection**: Identify syntax or semantic errors in queries.
-- **Triggering Mechanisms**: Analyze queries manually, via keyboard shortcuts, or automatically on file save.
-- **Status Bar Feedback**: View scan results and errors in the VS Code status bar.
-- **Configurable Options**: Customize thresholds, notifications, and authentication methods.
+- **Multiple Triggering Mechanisms**:
+  - Analyze queries manually via Command Palette
+  - Set custom keyboard shortcuts for quick analysis
+  - Automatically analyze on file save
+  - Automatically analyze on file content changes (with configurable debounce delay)
+  - Automatically analyze when opening SQL files
+- **Intelligent Analysis**: Avoids redundant analysis of unchanged content within a specified time window.
+- **Status Bar Integration**: Real-time feedback with color coding (green for success, yellow for warnings, red for errors).
+- **Configurable Settings**: Customize thresholds, toggle features, and control automatic analysis behavior.
 
 ## Requirements
 
 - Google Cloud SDK installed and authenticated (`gcloud auth application-default login`) or a service account JSON key file.
-- Node.js and npm installed for development.
+- VS Code version 1.99.0 or higher.
+- Node.js and npm (for development only).
+
+## Installation
+
+### From VSIX File
+1. Download the `.vsix` file from the repository releases.
+2. In VS Code, go to the Extensions view (`Ctrl+Shift+X` or `Cmd+Shift+X` on macOS). Click on the "..." menu at the top-right of the Extensions panel and select "Install from VSIX...".
+3. **OR**, open the Command Palette (`Ctrl+Shift+P` or `Cmd+Shift+P` on macOS) and type `Extensions: Install from VSIX...`.
+4. Select the downloaded `.vsix` file and install.
+
+### Manual Build
+1. Clone the repository.
+2. Run `npm install` to install dependencies.
+3. Run `npm run package` to build the extension.
+4. The `.vsix` file will be generated in the project root.
 
 ## Usage
 
+### Basic Usage
 1. Open a `.sql` file in VS Code.
-2. Run the command `BigQuery Previewer: Analyze Query` from the Command Palette (`Cmd+Shift+P` or `Ctrl+Shift+P`).
-3. View the results in the status bar or as notifications.
+2. The extension will automatically analyze the query (if auto-analysis settings are enabled).
+3. View the results in the status bar (scan size, warnings, or errors).
+
+### Manual Analysis
+- Run the command `BigQuery Previewer: Analyze Query` from the Command Palette (`Cmd+Shift+P` or `Ctrl+Shift+P`).
+- Customize a keyboard shortcut for frequent use.
+
+### Automatic Analysis
+By default, the extension analyzes SQL files:
+- When opening a SQL file
+- When saving a SQL file
+- When making changes to a SQL file
+
+These automatic behaviors can be enabled or disabled in settings.
 
 ## Extension Settings
 
 This extension contributes the following settings:
 
-```json
-{
-    "bigqueryPreviewer.authMode": "adc", // or "service_account"
-    "bigqueryPreviewer.serviceAccountKeyPath": "/path/to/key.json",
-    "bigqueryPreviewer.showScanWarnings": true,
-    "bigqueryPreviewer.scanWarningThresholdMB": 100,
-    "bigqueryPreviewer.autoRunOnSave": true,
-    "bigqueryPreviewer.enableStatusBar": true,
-    "bigqueryPreviewer.enableNotifications": false
-}
+| Setting | Description | Default |
+|---------|-------------|---------|
+| `bigqueryPreviewer.authMode` | Authentication mode for BigQuery (`"adc"` or `"service_account")` | `"adc"` |
+| `bigqueryPreviewer.serviceAccountKeyPath` | Path to service account key file | `""` |
+| `bigqueryPreviewer.showScanWarnings` | Enable or disable scan warnings | `true` |
+| `bigqueryPreviewer.scanWarningThresholdMB` | Threshold for scan size warnings (MB) | `100` |
+| `bigqueryPreviewer.autoRunOnSave` | Automatically analyze on file save | `true` |
+| `bigqueryPreviewer.autoRunOnChange` | Automatically analyze on file content change | `true` |
+| `bigqueryPreviewer.changeDebounceDelayMs` | Delay in milliseconds to wait after typing stops before analyzing (when autoRunOnChange is enabled) | `1500` |
+| `bigqueryPreviewer.autoRunOnOpen` | Automatically analyze when opening a file | `true` |
+| `bigqueryPreviewer.enableStatusBar` | Enable or disable status bar feedback | `true` |
+| `bigqueryPreviewer.enableNotifications` | Enable or disable popup notifications | `false` |
+
+## Authentication
+
+### Application Default Credentials (ADC)
+Use the Google Cloud SDK to authenticate:
+```bash
+gcloud auth application-default login
 ```
+
+### Service Account
+1. Create a service account with appropriate BigQuery permissions
+2. Generate and download a JSON key file
+3. Set the path to the key file in the extension settings
 
 ## Known Issues
 
 - Ensure the Google Cloud SDK is properly configured for ADC authentication.
 - Service account key files must be accessible and correctly specified in settings.
+- VS Code must have permission to access the key file location.
 
 ## Release Notes
 
-### 0.0.1
+### 0.0.1 - April 2025
 
-- Initial release with dry run, scan estimation, and error detection features.
+- Initial release with dry run, scan estimation, and error detection features
+- Automatic analysis on file save, file changes, and file open
+- Status bar integration with color-coded feedback
+- Configurable settings for thresholds and behavior
+
+## Development
+
+- Extension built with TypeScript and VS Code Extension API
+- Uses Google Cloud BigQuery SDK for dry run analysis
+- Comprehensive test suite using Mocha and Sinon
