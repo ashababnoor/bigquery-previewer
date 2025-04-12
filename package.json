@@ -10,7 +10,7 @@
     "url": "https://github.com/ashababnoor"
   },
   "license": "MIT",
-  "icon": "resources/logo.png",
+  "icon": "icon.png",
   "engines": {
     "vscode": "^1.99.0"
   },
