@@ -5,6 +5,8 @@
 
 BigQuery Previewer is a Visual Studio Code extension that helps developers analyze BigQuery SQL files before execution. It performs a **dry run** of the query using the BigQuery API to detect potential issues such as high data scan volume and query errors — without actually executing the query. This tool enables safer and more cost-aware SQL development directly from within VS Code.
 
+Find the extension on the [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=shabab.bigquery-previewer).
+
 ## Features
 
 - **Dry Run Execution**: Analyze BigQuery SQL files without executing them.
@@ -59,15 +61,15 @@ code --install-extension shabab.bigquery-previewer
 
 ### Basic Usage
 1. Open a `.sql` file in VS Code.
-2. Click the "$(debug-start) BigQuery Previewer" button in the status bar or run the command "BigQuery Previewer: Start" from the Command Palette to activate the extension.
+2. Click the "BigQuery Previewer" button in the status bar or run the command "BigQuery Previewer: Start" from the Command Palette to activate the extension.
 3. The extension will then analyze your SQL files according to your configuration settings.
 4. View the results in the status bar (scan size, warnings, or errors).
 5. Click on the result in the status bar to access options to pause the extension or hide the result.
 
 ### Starting and Pausing the Extension
 - The extension starts in a paused state to avoid unnecessary API calls.
-- To start analysis: Click the "$(debug-start) BigQuery Previewer" button in the status bar or run the "BigQuery Previewer: Start" command.
-- To pause analysis: Click the "$(debug-pause) BigQuery Previewer" button or run the "BigQuery Previewer: Pause" command.
+- To start analysis: Click the "BigQuery Previewer" button in the status bar or run the "BigQuery Previewer: Start" command.
+- To pause analysis: Click the "BigQuery Previewer" button or run the "BigQuery Previewer: Pause" command.
 - When paused, no automatic analysis will run, saving API calls and resources.
 
 ### Interactive Status Bar
