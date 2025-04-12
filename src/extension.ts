@@ -203,7 +203,20 @@ export function activate(context: vscode.ExtensionContext) {
 	const startExtensionCommand = vscode.commands.registerCommand('bigquery-previewer.startExtension', () => {
 		isExtensionActive = true;
 		updateControlStatusBar();
-		vscode.window.showInformationMessage('BigQuery Previewer is now active. SQL files will be automatically analyzed.');
+		
+		 // Auto-dismissing message using standard VS Code API
+		vscode.window.withProgress(
+			{
+				location: vscode.ProgressLocation.Notification,
+				title: 'BigQuery Previewer is now active. SQL files will be automatically analyzed.',
+				cancellable: true
+			},
+			async (progress) => {
+				// Auto-dismiss after 3 seconds
+				await new Promise(resolve => setTimeout(resolve, 3000));
+				return;
+			}
+		);
 		
 		// Trigger analysis of current file if it's SQL
 		const editor = vscode.window.activeTextEditor;
@@ -222,7 +235,19 @@ export function activate(context: vscode.ExtensionContext) {
 			changeDebounceTimer = undefined;
 		}
 		
-		vscode.window.showInformationMessage('BigQuery Previewer is now paused. No automatic analysis will occur.');
+		 // Auto-dismissing message using standard VS Code API
+		vscode.window.withProgress(
+			{
+				location: vscode.ProgressLocation.Notification,
+				title: 'BigQuery Previewer is now paused. No automatic analysis will occur.',
+				cancellable: true
+			},
+			async (progress) => {
+				// Auto-dismiss after 3 seconds
+				await new Promise(resolve => setTimeout(resolve, 3000));
+				return;
+			}
+		);
 	});
 	
 	const showResultOptionsCommand = vscode.commands.registerCommand('bigquery-previewer.showResultOptions', async () => {
