@@ -3,6 +3,14 @@
   "displayName": "BigQuery Previewer",
   "description": "A VS Code extension to analyze BigQuery SQL files via dry runs.",
   "version": "0.0.1",
+  "publisher": "ahmed-shabab-noor",
+  "author": {
+    "name": "Ahmed Shabab Noor",
+    "email": "ashababnoor@gmail.com",
+    "url": "https://github.com/ashababnoor"
+  },
+  "license": "MIT",
+  "icon": "resources/logo.png",
   "engines": {
     "vscode": "^1.99.0"
   },
