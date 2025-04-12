@@ -7,6 +7,24 @@ let statusBarItem: vscode.StatusBarItem;
 let lastRunTime: number | null = null;
 let isRunning = false;
 let waitTimeUntilNextRun: number = 5000; // 5 seconds
+const documentVersions = new Map<string, number>();
+
+/**
+ * Checks if the document has changed since last check (edited, saved, etc.)
+ * @param document The TextDocument to check
+ * @returns true if changed since last check, false otherwise
+ */
+export function hasDocumentChanged(document: vscode.TextDocument): boolean {
+	const uri = document.uri.toString();
+	const currentVersion = document.version;
+  
+	if (documentVersions.get(uri) === currentVersion) {
+	  return false; // No change
+	}
+  
+	documentVersions.set(uri, currentVersion);
+	return true; // Change detected
+  }
 
 function updateStatusBar(message: string, color: vscode.ThemeColor) {
     if (!statusBarItem) {
@@ -61,20 +79,20 @@ export async function performDryRun(query: string): Promise<{ scannedBytes: numb
 }
 
 async function analyzeQuery(document: vscode.TextDocument) {
-    const config = getConfiguration();
-    const currentTime = Date.now();
-	
 	// Guard clause to check if the document is available
 	if (!document) {
 		vscode.window.showErrorMessage('No active editor found. Please open a .sql file to analyze.');
 		return;
 	}
 
-	if (isRunning) {
-		if (lastRunTime && (currentTime - lastRunTime < waitTimeUntilNextRun)) {
-			console.log('Skipping analysis as it is already running and wait time has not elapsed.');
-			return;
-		}
+	const config = getConfiguration();
+    const currentTime = Date.now();
+	const waitTimeElapsed = lastRunTime && (currentTime - lastRunTime > waitTimeUntilNextRun);
+	const isDocumentChanged = hasDocumentChanged(document);
+
+	if (!waitTimeElapsed && !isDocumentChanged) {
+		console.log('Skipping analysis as wait time has not elapsed and document has not changed.');
+		return;
 	}
 
     isRunning = true;
