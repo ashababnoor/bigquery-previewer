@@ -17,7 +17,8 @@ BigQuery Previewer is a Visual Studio Code extension that helps developers analy
 
 ### 2.3 Scan Estimation  
 **R4.** The extension must fetch and display the total estimated bytes scanned by the query.  
-**R5.** If the scan size exceeds a configurable threshold (in MB), a warning must be issued.
+**R5.** If the scan size exceeds a configurable threshold (in MB), a warning must be issued.  
+  **R5.1.** The extension must allow users to enable or disable scan warnings via the `bigqueryPreviewer.showScanWarnings` setting. If disabled, only the scan size and errors are displayed.
 
 ### 2.4 Error Detection  
 **R6.** The extension must show syntax or semantic errors detected during the dry run process.
@@ -26,7 +27,7 @@ BigQuery Previewer is a Visual Studio Code extension that helps developers analy
 **R7.** The extension must support running the analysis manually via Command Palette (e.g., `BigQuery Previewer: Analyze Query`).  
 **R8.** The extension must allow defining a custom keyboard shortcut (keybinding) for quick analysis.  
 **R9.** The extension must support automatic analysis on file save (if enabled in settings).  
-**R10.** The extension must provide a way to cancel an ongoing analysis if needed. 
+**R10.** The extension must provide a way to cancel an ongoing analysis if needed.  
 
 ## 3. Non-Functional Requirements
 
@@ -69,6 +70,7 @@ BigQuery Previewer is a Visual Studio Code extension that helps developers analy
 {
   "bigqueryPreviewer.authMode": "adc", // or "service_account"
   "bigqueryPreviewer.serviceAccountKeyPath": "/path/to/key.json",
+  "bigqueryPreviewer.showScanWarnings": true,
   "bigqueryPreviewer.scanWarningThresholdMB": 100,
   "bigqueryPreviewer.autoRunOnSave": true,
   "bigqueryPreviewer.enableStatusBar": true,
