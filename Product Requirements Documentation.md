@@ -32,43 +32,48 @@ BigQuery Previewer is a Visual Studio Code extension that helps developers analy
     **R9.2.1.** When analyzing on file change, the extension must implement a configurable debounce mechanism to prevent excessive API calls during typing.  
   **R9.3.** Automatic analysis on file open (if enabled in settings).  
 **R10.** The extension must provide a way to cancel an ongoing analysis if needed.  
+**R11.** The extension must start in a paused state, requiring explicit activation before performing any analysis.  
+  **R11.1.** The extension must display a status bar button to start/pause the extension.  
+  **R11.2.** Commands must be available in the Command Palette to start and pause the extension.  
+**R12.** The result status bar item must be interactive.  
+  **R12.1.** Clicking on the result should show options to pause the extension or hide the result.
 
 ## 3. Non-Functional Requirements
 
-**R11.** The extension should return feedback in under 1 second for typical queries.  
-**R12.** No sensitive query data should be stored or executed during the dry run process.  
-**R13.** The extension must support Windows, macOS, and Linux environments.  
-**R14.** Users must be able to configure thresholds and toggle features such as warnings and notifications.  
-**R15.** The extension must be installable locally via a `.vsix` file without requiring it to be published on the marketplace.  
-**R16.** The extension should support mocking dry run behavior to allow for unit and integration testing.  
+**R13.** The extension should return feedback in under 1 second for typical queries.  
+**R14.** No sensitive query data should be stored or executed during the dry run process.  
+**R15.** The extension must support Windows, macOS, and Linux environments.  
+**R16.** Users must be able to configure thresholds and toggle features such as warnings and notifications.  
+**R17.** The extension must be installable locally via a `.vsix` file without requiring it to be published on the marketplace.  
+**R18.** The extension should support mocking dry run behavior to allow for unit and integration testing.  
 
 ---
 
 ## 4. User Interface Requirements
 
 ### 4.1 Status Bar Feedback  
-**R17.** The extension must show scan results (e.g., bytes to be scanned, error state) in the VS Code status bar by default.  
-  **R17.1.** If the status bar is enabled, the extension must indicate in the status bar when the analysis starts (e.g. `"Analyzing..."`), and update it with the result (success, warning, or error) when done instead of creating popups (info message). If the status bar is disabled, the extension must fall back to using popups.  
-**R18.** The status bar output must be clear and human-readable, displaying the scan size in MB or GB.  
-**R19.** The status bar output must be color coded to indicate the state (e.g., green for safe, yellow for warning, red for error).  
+**R19.** The extension must show scan results (e.g., bytes to be scanned, error state) in the VS Code status bar by default.  
+  **R19.1.** If the status bar is enabled, the extension must indicate in the status bar when the analysis starts (e.g. `"Analyzing..."`), and update it with the result (success, warning, or error) when done instead of creating popups (info message). If the status bar is disabled, the extension must fall back to using popups.  
+**R20.** The status bar output must be clear and human-readable, displaying the scan size in MB or GB.  
+**R21.** The status bar output must be color coded to indicate the state (e.g., green for safe, yellow for warning, red for error).  
 
 ### 4.2 Notifications  
-**R20.** The extension must support (optional) popup notifications to display scan warnings or error messages. This behavior should be configurable.
+**R22.** The extension must support (optional) popup notifications to display scan warnings or error messages. This behavior should be configurable.
 
 ---
 
 ## 5. Authentication
 
-**R21.** The extension must support authentication via Application Default Credentials (ADC) using `gcloud auth application-default login`.  
-**R22.** The extension must support service account authentication via a JSON key file path provided in settings.  
-**R23.** The extension must allow users to toggle between authentication methods in settings.  
-**R24.** The extension must provide clear documentation on how to set up each authentication method.
+**R23.** The extension must support authentication via Application Default Credentials (ADC) using `gcloud auth application-default login`.  
+**R24.** The extension must support service account authentication via a JSON key file path provided in settings.  
+**R25.** The extension must allow users to toggle between authentication methods in settings.  
+**R26.** The extension must provide clear documentation on how to set up each authentication method.
 
 ---
 
 ## 6. Configuration Options
 
-**R25.** The extension must expose the following configurable options via `settings.json`:
+**R27.** The extension must expose the following configurable options via `settings.json`:
 
 ```json
 {
