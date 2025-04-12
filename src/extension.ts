@@ -47,11 +47,11 @@ function formatDataSize(bytes: number): string {
 export function hasDocumentChanged(document: vscode.TextDocument): boolean {
 	const uri = document.uri.toString();
 	const currentVersion = document.version;
-  
+
 	if (documentVersions.get(uri) === currentVersion) {
 	  return false; // No change
 	}
-  
+    
 	documentVersions.set(uri, currentVersion);
 	return true; // Change detected
 }
@@ -219,38 +219,59 @@ async function analyzeQuery(document: vscode.TextDocument, editor?: vscode.TextE
         if (errors.length > 0) {
             lastFullErrorMessage = errors.join('; ');
             const maxErrorLength = 50;
-            const truncatedError = lastFullErrorMessage.length > maxErrorLength ? lastFullErrorMessage.substring(0, maxErrorLength) + '...' : lastFullErrorMessage;
+            const truncatedError = lastFullErrorMessage.length > maxErrorLength ? 
+                lastFullErrorMessage.substring(0, maxErrorLength) + '...' : 
+                lastFullErrorMessage;
 
             if (config.enableStatusBar) {
                 updateStatusBar(`Error: ${truncatedError}`, 
                     new vscode.ThemeColor('statusBarItem.errorForeground'),
                     new vscode.ThemeColor('statusBarItem.errorBackground'),
-                    lastFullErrorMessage);
+                    lastFullErrorMessage // Pass full message as tooltip
+                );
             } else {
-                vscode.window.showErrorMessage(`Query analysis failed: ${truncatedError}`);
+                vscode.window.showErrorMessage(`Query analysis failed: ${lastFullErrorMessage}`);
             }
         } else {
-            const dataScanSize = formatDataSize(scannedBytes);
-            const selectionPrefix = isSelectionAnalysis ? '$(selection) Selection: ' : '';
+            // No errors, proceed with success or warning message
             lastFullErrorMessage = null;
+            
+            const formattedScanSize = formatDataSize(scannedBytes);
+            
+            // Use MB for threshold comparison but display in appropriate unit
+            const mbThresholdInBytes = config.scanWarningThresholdMB * 1024 * 1024;
 
-            if (config.showScanWarnings && scannedBytes > config.scanWarningThresholdMB * 1024 * 1024) {
+            const selectionMsg = isSelectionAnalysis ? 'Selected text analysis' : 'Query analysis';
+            const selectionPrefix = isSelectionAnalysis ? '$(selection) Selection: ' : '';
+            
+            if (config.showScanWarnings && scannedBytes > mbThresholdInBytes) {
+                const fullWarningMessage = `${selectionMsg} successful. Estimated scan size: ${formattedScanSize} exceeds the threshold of ${formatDataSize(mbThresholdInBytes)}.`;
+                const shortWarningMessage = `${selectionPrefix}$(warning) Scan: ${formattedScanSize} (Warning)`;
+                
                 if (config.enableStatusBar) {
-                    updateStatusBar(`${selectionPrefix}$(warning) Scan: ${dataScanSize} (Warning)`, 
+                    updateStatusBar(
+                        shortWarningMessage, 
                         new vscode.ThemeColor('statusBarItem.warningForeground'),
-                        new vscode.ThemeColor('statusBarItem.warningBackground'));
+                        new vscode.ThemeColor('statusBarItem.warningBackground'),
+                        fullWarningMessage // Pass full message as tooltip
+                    );
                 } else {
-                    const selectionMsg = isSelectionAnalysis ? 'Selected text analysis' : 'Query analysis';
-                    vscode.window.showWarningMessage(`${selectionMsg} successful. Estimated scan size: ${dataScanSize} exceeds the threshold.`);
+                    vscode.window.showWarningMessage(fullWarningMessage);
                 }
             } else {
+                const fullSuccessMessage = `${selectionMsg} successful. Estimated scan size: ${formattedScanSize}.`;
+                const shortSuccessMessage = `${selectionPrefix}$(pass-filled) Scan: ${formattedScanSize}`;
+                
                 if (config.enableStatusBar) {
                     // Use consistent updateStatusBar function with green text
-                    updateStatusBar(`${selectionPrefix}$(pass-filled) Scan: ${dataScanSize}`, 
-                        new vscode.ThemeColor('bigqueryPreviewer.successForeground'));
+                    updateStatusBar(
+                        shortSuccessMessage, 
+                        new vscode.ThemeColor('bigqueryPreviewer.successForeground'),
+                        undefined, // No background color
+                        fullSuccessMessage // Pass full message as tooltip
+                    );
                 } else {
-                    const selectionMsg = isSelectionAnalysis ? 'Selected text analysis' : 'Query analysis';
-                    vscode.window.showInformationMessage(`${selectionMsg} successful. Estimated scan size: ${dataScanSize}.`);
+                    vscode.window.showInformationMessage(fullSuccessMessage);
                 }
             }
         }
