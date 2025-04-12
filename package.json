@@ -18,10 +18,6 @@
   "contributes": {
     "commands": [
       {
-        "command": "bigquery-previewer.helloWorld",
-        "title": "Hello World"
-      },
-      {
         "command": "bigquery-previewer.analyzeQuery",
         "title": "BigQuery Previewer: Analyze Query"
       }
