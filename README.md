@@ -7,6 +7,9 @@ BigQuery Previewer is a Visual Studio Code extension that helps developers analy
 - **Dry Run Execution**: Analyze BigQuery SQL files without executing them.
 - **Scan Estimation**: Fetch and display the total estimated bytes scanned by the query.
 - **Error Detection**: Identify syntax or semantic errors in queries.
+- **Interactive UI Controls**:
+  - Start/pause analysis via status bar button or command palette
+  - Interactive result display with options to pause or hide results
 - **Multiple Triggering Mechanisms**:
   - Analyze queries manually via Command Palette
   - Set custom keyboard shortcuts for quick analysis
@@ -41,18 +44,34 @@ BigQuery Previewer is a Visual Studio Code extension that helps developers analy
 
 ### Basic Usage
 1. Open a `.sql` file in VS Code.
-2. The extension will automatically analyze the query (if auto-analysis settings are enabled).
-3. View the results in the status bar (scan size, warnings, or errors).
+2. Click the "$(debug-start) BigQuery Previewer" button in the status bar or run the command "BigQuery Previewer: Start" from the Command Palette to activate the extension.
+3. The extension will then analyze your SQL files according to your configuration settings.
+4. View the results in the status bar (scan size, warnings, or errors).
+5. Click on the result in the status bar to access options to pause the extension or hide the result.
+
+### Starting and Pausing the Extension
+- The extension starts in a paused state to avoid unnecessary API calls.
+- To start analysis: Click the "$(debug-start) BigQuery Previewer" button in the status bar or run the "BigQuery Previewer: Start" command.
+- To pause analysis: Click the "$(debug-pause) BigQuery Previewer" button or run the "BigQuery Previewer: Pause" command.
+- When paused, no automatic analysis will run, saving API calls and resources.
+
+### Interactive Status Bar
+- **Control Button**: Shows the current state of the extension (active or paused) and allows toggling between states.
+- **Result Display**: Shows analysis results with color coding (green text for success, yellow background for warnings, red background for errors).
+- **Result Options**: Click on any result to access a menu where you can:
+  - Pause the extension
+  - Hide the current result (until the next analysis is run)
 
 ### Manual Analysis
 - Run the command `BigQuery Previewer: Analyze Query` from the Command Palette (`Cmd+Shift+P` or `Ctrl+Shift+P`).
+- If the extension is paused, you'll be prompted to activate it first.
 - Customize a keyboard shortcut for frequent use.
 
 ### Automatic Analysis
-By default, the extension analyzes SQL files:
-- When opening a SQL file
-- When saving a SQL file
-- When making changes to a SQL file
+When the extension is active, it analyzes SQL files:
+- When opening a SQL file (if `autoRunOnOpen` is enabled)
+- When saving a SQL file (if `autoRunOnSave` is enabled)
+- When making changes to a SQL file (if `autoRunOnChange` is enabled)
 
 These automatic behaviors can be enabled or disabled in settings.
 
@@ -62,7 +81,7 @@ This extension contributes the following settings:
 
 | Setting | Description | Default |
 |---------|-------------|---------|
-| `bigqueryPreviewer.authMode` | Authentication mode for BigQuery (`"adc"` or `"service_account")` | `"adc"` |
+| `bigqueryPreviewer.authMode` | Authentication mode for BigQuery (`"adc"` or `"service_account"`) | `"adc"` |
 | `bigqueryPreviewer.serviceAccountKeyPath` | Path to service account key file | `""` |
 | `bigqueryPreviewer.showScanWarnings` | Enable or disable scan warnings | `true` |
 | `bigqueryPreviewer.scanWarningThresholdMB` | Threshold for scan size warnings (MB) | `100` |
