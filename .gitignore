@@ -1,0 +1,27 @@
+# Node.js Dependencies
+node_modules/
+package-lock.json
+npm-debug.log*
+yarn-error.log
+
+# VS Code Extension Build
+out/
+dist/
+.vscode-test/
+
+# Environment & Credentials
+.env
+.env.*
+*.key.json
+
+# OS-Specific Files
+.DS_Store
+Thumbs.db
+
+# Editor & IDE Files
+.vscode/
+.idea/
+*.code-workspace
+
+# VSIX Packages
+*.vsix
