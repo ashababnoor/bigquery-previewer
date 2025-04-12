@@ -14,6 +14,7 @@ let changeDebounceTimer: NodeJS.Timeout | undefined;
 let isExtensionActive = false; // Track if extension is active for analysis
 let closingDocuments = new Set<string>(); // Track documents that are being closed
 const savingDocuments = new Map<string, NodeJS.Timeout>(); // Track documents being saved to detect save-on-close
+let lastFullErrorMessage: string | null = null; // Store the last full error message for viewing
 
 /**
  * Checks if the document has changed since last check (edited, saved, etc.)
@@ -41,7 +42,7 @@ function isEligibleForAnalysis(document: vscode.TextDocument): boolean {
     return document.languageId === 'sql' || document.fileName.endsWith('.sql');
 }
 
-function updateStatusBar(message: string, color: vscode.ThemeColor, backgroundColor?: vscode.ThemeColor) {
+function updateStatusBar(message: string, color: vscode.ThemeColor, backgroundColor?: vscode.ThemeColor, tooltip?: string) {
     if (!resultStatusBarItem) {
         resultStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 99);
         resultStatusBarItem.command = 'bigquery-previewer.showResultOptions';
@@ -49,6 +50,13 @@ function updateStatusBar(message: string, color: vscode.ThemeColor, backgroundCo
     
     resultStatusBarItem.text = message;
     resultStatusBarItem.color = color;
+    
+    // Set the tooltip if provided
+    if (tooltip) {
+        resultStatusBarItem.tooltip = tooltip;
+    } else {
+        resultStatusBarItem.tooltip = message; // Default to the displayed message
+    }
     
     // Set the background color if provided
     if (backgroundColor) {
@@ -186,16 +194,21 @@ async function analyzeQuery(document: vscode.TextDocument, editor?: vscode.TextE
         const { scannedBytes, errors } = await performDryRun(query);
 
         if (errors.length > 0) {
+            lastFullErrorMessage = errors.join('; ');
+            const truncatedError = lastFullErrorMessage.length > 100 ? lastFullErrorMessage.substring(0, 30) + '...' : lastFullErrorMessage;
+
             if (config.enableStatusBar) {
-                updateStatusBar(`Error: ${errors.join('; ')}`, 
+                updateStatusBar(`Error: ${truncatedError}`, 
                     new vscode.ThemeColor('statusBarItem.errorForeground'),
-                    new vscode.ThemeColor('statusBarItem.errorBackground'));
+                    new vscode.ThemeColor('statusBarItem.errorBackground'),
+                    lastFullErrorMessage);
             } else {
-                vscode.window.showErrorMessage(`Query analysis failed: ${errors.join('; ')}`);
+                vscode.window.showErrorMessage(`Query analysis failed: ${truncatedError}`);
             }
         } else {
             const scannedMB = (scannedBytes / (1024 * 1024)).toFixed(2);
             const selectionPrefix = isSelectionAnalysis ? '$(selection) Selection: ' : '';
+            lastFullErrorMessage = null;
 
             if (config.showScanWarnings && scannedBytes > config.scanWarningThresholdMB * 1024 * 1024) {
                 if (config.enableStatusBar) {
@@ -299,6 +312,11 @@ export function activate(context: vscode.ExtensionContext) {
 		if (isResultStatusBarVisible) {
 			options.push({ label: '$(eye-closed) Hide', description: 'Hide this result' });
 		}
+
+        // Add option to view full error message if available
+        if (lastFullErrorMessage) {
+            options.push({ label: '$(error) View Full Error', description: 'View the full error message' });
+        }
 		
 		// Show the quick pick with available options
 		const selected = await vscode.window.showQuickPick(options, {
@@ -312,7 +330,9 @@ export function activate(context: vscode.ExtensionContext) {
 				vscode.commands.executeCommand('bigquery-previewer.startExtension');
 			} else if (selected.label.includes('Hide')) {
 				hideResultStatusBar();
-			}
+			} else if (selected.label.includes('View Full Error')) {
+                vscode.window.showErrorMessage(lastFullErrorMessage || 'No error message available.');
+            }
 		}
 	});
 	
