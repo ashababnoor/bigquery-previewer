@@ -9,9 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Selection Analysis: When text is selected in a SQL file, only the selected portion will be analyzed instead of the entire file
 - Visual indication in status bar when analyzing a selection vs. the entire file
+- Hover support for error messages: Full error details now appear when hovering over the status bar
+- "View Full Error" option when clicking on error messages in status bar
 
 ### Changed
 - Improved performance: Skip analysis when closing files, even if they're being saved during closure
+- Changed notification dialogs to show an "X" close button instead of "Cancel"
+- Improved code organization with centralized SQL file detection logic
 
 ## [1.0.0] - 2025-04-12
 
