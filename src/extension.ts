@@ -85,10 +85,14 @@ export function activate(context: vscode.ExtensionContext) {
 		}
 
 		const document = editor.document;
-		if (document.languageId !== 'sql') {
-			vscode.window.showErrorMessage('The active file is not a .sql file.');
-			return;
-		}
+		const languageId = document.languageId;
+        const fileName = document.fileName;
+        console.log(`Active file languageId: ${languageId}, fileName: ${fileName}`);
+
+        if (languageId !== 'sql' && !fileName.endsWith('.sql')) {
+            vscode.window.showErrorMessage('The active file is not a .sql file.');
+            return;
+        }
 
 		const query = document.getText();
 		vscode.window.showInformationMessage('Analyzing BigQuery SQL file...');
