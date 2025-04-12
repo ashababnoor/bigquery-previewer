@@ -2,7 +2,7 @@
   "name": "bigquery-previewer",
   "displayName": "BigQuery Previewer",
   "description": "A VS Code extension to analyze BigQuery SQL files via dry runs.",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "publisher": "shabab",
   "author": {
     "name": "Ahmed Shabab Noor",
@@ -15,7 +15,23 @@
     "vscode": "^1.99.0"
   },
   "categories": [
+    "Programming Languages",
+    "Data Science",
     "Other"
+  ],
+  "keywords": [
+    "BigQuery",
+    "SQL",
+    "Google Cloud",
+    "Data Science",
+    "BigQuery SQL",
+    "VSCode Extension",
+    "BigQuery Preview",
+    "BigQuery Dry Run",
+    "BigQuery Analysis",
+    "BigQuery Query Analysis",
+    "BigQuery Data Scan",
+    "Data Scan"
   ],
   "activationEvents": [],
   "main": "./dist/extension.js",
