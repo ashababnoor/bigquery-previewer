@@ -31,6 +31,11 @@ BigQuery Previewer is a Visual Studio Code extension that helps developers analy
   **R9.2.** Automatic analysis on file change (if enabled in settings).  
     **R9.2.1.** When analyzing on file change, the extension must implement a configurable debounce mechanism to prevent excessive API calls during typing.  
   **R9.3.** Automatic analysis on file open (if enabled in settings).  
+  **R9.4.** Automatic analysis on text selection after a stabilization delay (750ms; configurable).
+    **R9.4.1.** The extension must only analyze a selection after it remains unchanged for the stabilization period.
+    **R9.4.2.** The extension must cancel pending selection analysis if the selection changes before the delay elapses.
+    **R9.4.3.** The extension must limit the number of selection-triggered analyses to prevent excessive API calls.
+    **R9.4.4.** Selection-based analysis results must be visually distinct in the status bar (with a selection icon).
 **R10.** The extension must provide a way to cancel an ongoing analysis if needed.  
 **R11.** The extension must start in a paused state, requiring explicit activation before performing any analysis.  
   **R11.1.** The extension must display a status bar button to start/pause the extension.  
