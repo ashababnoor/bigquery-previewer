@@ -57,6 +57,44 @@ export async function performDryRun(query: string): Promise<{ scannedBytes: numb
     }
 }
 
+async function analyzeQuery(document: vscode.TextDocument) {
+    const config = getConfiguration();
+    if (document.languageId === 'sql' || document.fileName.endsWith('.sql')) {
+        if (config.enableStatusBar) {
+            updateStatusBar('Analyzing...', new vscode.ThemeColor('statusBarItem.foreground'));
+        } else {
+            vscode.window.showInformationMessage('Analyzing BigQuery SQL file...');
+        }
+
+        const query = document.getText();
+        const { scannedBytes, errors } = await performDryRun(query);
+
+        if (errors.length > 0) {
+            if (config.enableStatusBar) {
+                updateStatusBar('Error in query analysis', new vscode.ThemeColor('statusBarItem.errorForeground'));
+            } else {
+                vscode.window.showErrorMessage(`Query analysis failed: ${errors.join('; ')}`);
+            }
+        } else {
+            const scannedMB = (scannedBytes / (1024 * 1024)).toFixed(2);
+
+            if (config.showScanWarnings && scannedBytes > config.scanWarningThresholdMB * 1024 * 1024) {
+                if (config.enableStatusBar) {
+                    updateStatusBar(`Scan size: ${scannedMB} MB (Warning)`, new vscode.ThemeColor('statusBarItem.warningForeground'));
+                } else {
+                    vscode.window.showWarningMessage(`Query analysis successful. Estimated scan size: ${scannedMB} MB exceeds the threshold.`);
+                }
+            } else {
+                if (config.enableStatusBar) {
+                    updateStatusBar(`Scan size: ${scannedMB} MB`, new vscode.ThemeColor('statusBarItem.foreground'));
+                } else {
+                    vscode.window.showInformationMessage(`Query analysis successful. Estimated scan size: ${scannedMB} MB.`);
+                }
+            }
+        }
+    }
+}
+
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
@@ -71,70 +109,24 @@ export function activate(context: vscode.ExtensionContext) {
 
 	// Register the command for manual analysis
 	const analyzeQueryCommand = vscode.commands.registerCommand('bigquery-previewer.analyzeQuery', async () => {
-		const config = getConfiguration();
 		const editor = vscode.window.activeTextEditor;
 		if (!editor) {
 			vscode.window.showErrorMessage('No active editor found. Please open a .sql file to analyze.');
 			return;
 		}
 
-		const document = editor.document;
-		const languageId = document.languageId;
-        const fileName = document.fileName;
-        console.log(`Active file languageId: ${languageId}, fileName: ${fileName}`);
-
-        if (languageId !== 'sql' && !fileName.endsWith('.sql')) {
-            vscode.window.showErrorMessage('The active file is not a .sql file.');
-            return;
-        }
-
-		const query = document.getText();
-
-        if (config.enableStatusBar) {
-            updateStatusBar('Analyzing...', new vscode.ThemeColor('statusBarItem.foreground'));
-        } else {
-            vscode.window.showInformationMessage('Analyzing BigQuery SQL file...');
-        }
-
-        const { scannedBytes, errors } = await performDryRun(query);
-
-        const showScanWarnings = config.showScanWarnings;
-
-        if (errors.length > 0) {
-            if (config.enableStatusBar) {
-                updateStatusBar('Error in query analysis', new vscode.ThemeColor('statusBarItem.errorForeground'));
-            } else {
-                vscode.window.showErrorMessage(`Query analysis failed: ${errors.join('; ')}`);
-            }
-        } else {
-            const scannedMB = (scannedBytes / (1024 * 1024)).toFixed(2);
-
-            if (showScanWarnings && scannedBytes > config.scanWarningThresholdMB * 1024 * 1024) {
-                if (config.enableStatusBar) {
-                    updateStatusBar(`Scan size: ${scannedMB} MB (Warning)`, new vscode.ThemeColor('statusBarItem.warningForeground'));
-                } else {
-                    vscode.window.showWarningMessage(`Query analysis successful. Estimated scan size: ${scannedMB} MB exceeds the threshold.`);
-                }
-            } else {
-                if (config.enableStatusBar) {
-                    updateStatusBar(`Scan size: ${scannedMB} MB`, new vscode.ThemeColor('statusBarItem.foreground'));
-                } else {
-                    vscode.window.showInformationMessage(`Query analysis successful. Estimated scan size: ${scannedMB} MB.`);
-                }
-            }
-        }
+		await analyzeQuery(editor.document);
 	});
 
 	context.subscriptions.push(analyzeQueryCommand);
 
 	// Event listener for file save (auto analysis if enabled)
-	vscode.workspace.onDidSaveTextDocument((document) => {
-		const config = getConfiguration();
-		if (document.languageId === 'sql' && config.autoRunOnSave) {
-			vscode.window.showInformationMessage('Auto-analyzing BigQuery SQL file on save...');
-			// Placeholder for auto-analysis logic
-		}
-	});
+	vscode.workspace.onDidSaveTextDocument(async (document) => {
+        const config = getConfiguration();
+        if (config.autoRunOnSave) {
+            await analyzeQuery(document);
+        }
+    });
 }
 
 // This method is called when your extension is deactivated
