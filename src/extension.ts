@@ -17,6 +17,29 @@ const savingDocuments = new Map<string, NodeJS.Timeout>(); // Track documents be
 let lastFullErrorMessage: string | null = null; // Store the last full error message for viewing
 
 /**
+ * Formats data size in bytes to a human-readable string (KB, MB, GB, TB)
+ * @param bytes The size in bytes to format
+ * @returns A formatted string with appropriate unit (KB, MB, GB, TB)
+ */
+function formatDataSize(bytes: number): string {
+    if (bytes === 0) {
+        return '0 B';
+    }
+    
+    const units = ['B', 'KB', 'MB', 'GB', 'TB'];
+    const base = 1024;
+    const decimals = 2;
+    
+    // Calculate the appropriate unit
+    const i = Math.floor(Math.log(bytes) / Math.log(base));
+    
+    // Format with the appropriate unit and decimal places
+    const size = parseFloat((bytes / Math.pow(base, i)).toFixed(decimals));
+    
+    return `${size} ${units[i]}`;
+}
+
+/**
  * Checks if the document has changed since last check (edited, saved, etc.)
  * @param document The TextDocument to check
  * @returns true if changed since last check, false otherwise
@@ -195,7 +218,8 @@ async function analyzeQuery(document: vscode.TextDocument, editor?: vscode.TextE
 
         if (errors.length > 0) {
             lastFullErrorMessage = errors.join('; ');
-            const truncatedError = lastFullErrorMessage.length > 100 ? lastFullErrorMessage.substring(0, 30) + '...' : lastFullErrorMessage;
+            const maxErrorLength = 50;
+            const truncatedError = lastFullErrorMessage.length > maxErrorLength ? lastFullErrorMessage.substring(0, maxErrorLength) + '...' : lastFullErrorMessage;
 
             if (config.enableStatusBar) {
                 updateStatusBar(`Error: ${truncatedError}`, 
@@ -206,27 +230,27 @@ async function analyzeQuery(document: vscode.TextDocument, editor?: vscode.TextE
                 vscode.window.showErrorMessage(`Query analysis failed: ${truncatedError}`);
             }
         } else {
-            const scannedMB = (scannedBytes / (1024 * 1024)).toFixed(2);
+            const dataScanSize = formatDataSize(scannedBytes);
             const selectionPrefix = isSelectionAnalysis ? '$(selection) Selection: ' : '';
             lastFullErrorMessage = null;
 
             if (config.showScanWarnings && scannedBytes > config.scanWarningThresholdMB * 1024 * 1024) {
                 if (config.enableStatusBar) {
-                    updateStatusBar(`${selectionPrefix}$(warning) Scan: ${scannedMB} MB (Warning)`, 
+                    updateStatusBar(`${selectionPrefix}$(warning) Scan: ${dataScanSize} (Warning)`, 
                         new vscode.ThemeColor('statusBarItem.warningForeground'),
                         new vscode.ThemeColor('statusBarItem.warningBackground'));
                 } else {
                     const selectionMsg = isSelectionAnalysis ? 'Selected text analysis' : 'Query analysis';
-                    vscode.window.showWarningMessage(`${selectionMsg} successful. Estimated scan size: ${scannedMB} MB exceeds the threshold.`);
+                    vscode.window.showWarningMessage(`${selectionMsg} successful. Estimated scan size: ${dataScanSize} exceeds the threshold.`);
                 }
             } else {
                 if (config.enableStatusBar) {
                     // Use consistent updateStatusBar function with green text
-                    updateStatusBar(`${selectionPrefix}$(pass-filled) Scan: ${scannedMB} MB`, 
+                    updateStatusBar(`${selectionPrefix}$(pass-filled) Scan: ${dataScanSize}`, 
                         new vscode.ThemeColor('bigqueryPreviewer.successForeground'));
                 } else {
                     const selectionMsg = isSelectionAnalysis ? 'Selected text analysis' : 'Query analysis';
-                    vscode.window.showInformationMessage(`${selectionMsg} successful. Estimated scan size: ${scannedMB} MB.`);
+                    vscode.window.showInformationMessage(`${selectionMsg} successful. Estimated scan size: ${dataScanSize}.`);
                 }
             }
         }
