@@ -35,8 +35,12 @@ BigQuery Previewer is a Visual Studio Code extension that helps developers analy
 **R11.** The extension must start in a paused state, requiring explicit activation before performing any analysis.  
   **R11.1.** The extension must display a status bar button to start/pause the extension.  
   **R11.2.** Commands must be available in the Command Palette to start and pause the extension.  
+  **R11.3.** Notifications for starting and pausing should automatically dismiss after a short period (3 seconds).  
 **R12.** The result status bar item must be interactive.  
-  **R12.1.** Clicking on the result should show options to pause the extension or hide the result.
+  **R12.1.** Clicking on the result should show a context-aware menu with relevant options:  
+    **R12.1.1** When the extension is active, show an option to pause it.  
+    **R12.1.2** When the extension is paused, show an option to start it.  
+    **R12.1.3** Show an option to hide the result only when results are visible.
 
 ## 3. Non-Functional Requirements
 
