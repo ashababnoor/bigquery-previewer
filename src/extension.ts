@@ -95,34 +95,38 @@ export function activate(context: vscode.ExtensionContext) {
         }
 
 		const query = document.getText();
-		vscode.window.showInformationMessage('Analyzing BigQuery SQL file...');
 
-		const { scannedBytes, errors } = await performDryRun(query);
+        if (config.enableStatusBar) {
+            updateStatusBar('Analyzing...', new vscode.ThemeColor('statusBarItem.foreground'));
+        } else {
+            vscode.window.showInformationMessage('Analyzing BigQuery SQL file...');
+        }
 
-		if (errors.length > 0) {
-			vscode.window.showErrorMessage(`Query analysis failed: ${errors.join('; ')}`);
-			if (config.enableStatusBar) {
-				updateStatusBar('Error in query analysis', new vscode.ThemeColor('statusBarItem.errorForeground'));
-			}
-		} else {
-			const scannedMB = (scannedBytes / (1024 * 1024)).toFixed(2);
+        const { scannedBytes, errors } = await performDryRun(query);
 
-			if (scannedBytes > config.scanWarningThresholdMB * 1024 * 1024) {
-				if (config.enableNotifications) {
-					vscode.window.showWarningMessage(`Query analysis successful. Estimated scan size: ${scannedMB} MB exceeds the threshold.`);
-				}
-				if (config.enableStatusBar) {
-					updateStatusBar(`Scan size: ${scannedMB} MB (Warning)`, new vscode.ThemeColor('statusBarItem.warningForeground'));
-				}
-			} else {
-				if (config.enableNotifications) {
-					vscode.window.showInformationMessage(`Query analysis successful. Estimated scan size: ${scannedMB} MB.`);
-				}
-				if (config.enableStatusBar) {
-					updateStatusBar(`Scan size: ${scannedMB} MB`, new vscode.ThemeColor('statusBarItem.foreground'));
-				}
-			}
-		}
+        if (errors.length > 0) {
+            if (config.enableStatusBar) {
+                updateStatusBar('Error in query analysis', new vscode.ThemeColor('statusBarItem.errorForeground'));
+            } else {
+                vscode.window.showErrorMessage(`Query analysis failed: ${errors.join('; ')}`);
+            }
+        } else {
+            const scannedMB = (scannedBytes / (1024 * 1024)).toFixed(2);
+
+            if (scannedBytes > config.scanWarningThresholdMB * 1024 * 1024) {
+                if (config.enableStatusBar) {
+                    updateStatusBar(`Scan size: ${scannedMB} MB (Warning)`, new vscode.ThemeColor('statusBarItem.warningForeground'));
+                } else {
+                    vscode.window.showWarningMessage(`Query analysis successful. Estimated scan size: ${scannedMB} MB exceeds the threshold.`);
+                }
+            } else {
+                if (config.enableStatusBar) {
+                    updateStatusBar(`Scan size: ${scannedMB} MB`, new vscode.ThemeColor('statusBarItem.foreground'));
+                } else {
+                    vscode.window.showInformationMessage(`Query analysis successful. Estimated scan size: ${scannedMB} MB.`);
+                }
+            }
+        }
 	});
 
 	context.subscriptions.push(analyzeQueryCommand);
