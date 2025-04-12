@@ -22,6 +22,18 @@
         "title": "BigQuery Previewer: Analyze Query"
       }
     ],
+    "colors": [
+      {
+        "id": "bigqueryPreviewer.successBackground",
+        "description": "Background color for successful query analysis status",
+        "defaults": {
+          "dark": "#2aa152",
+          "light": "#2aa152",
+          "highContrast": "#2aa152",
+          "highContrastLight": "#2aa152"
+        }
+      }
+    ],
     "configuration": {
       "type": "object",
       "title": "BigQuery Previewer Configuration",
