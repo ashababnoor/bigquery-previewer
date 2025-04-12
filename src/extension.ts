@@ -8,6 +8,7 @@ let lastRunTime: number | null = null;
 let isRunning = false;
 let waitTimeUntilNextRun: number = 5000; // 5 seconds
 const documentVersions = new Map<string, number>();
+let changeDebounceTimer: NodeJS.Timeout | undefined;
 
 /**
  * Checks if the document has changed since last check (edited, saved, etc.)
@@ -42,9 +43,12 @@ function getConfiguration() {
         serviceAccountKeyPath: config.get<string>('serviceAccountKeyPath', ''),
         scanWarningThresholdMB: config.get<number>('scanWarningThresholdMB', 100),
         autoRunOnSave: config.get<boolean>('autoRunOnSave', true),
+        autoRunOnChange: config.get<boolean>('autoRunOnChange', true),
+        autoRunOnOpen: config.get<boolean>('autoRunOnOpen', true),
         enableStatusBar: config.get<boolean>('enableStatusBar', true),
         enableNotifications: config.get<boolean>('enableNotifications', false),
         showScanWarnings: config.get<boolean>('showScanWarnings', true),
+        changeDebounceDelayMs: config.get<number>('changeDebounceDelayMs', 1500),
     };
 }
 
@@ -164,6 +168,32 @@ export function activate(context: vscode.ExtensionContext) {
 	vscode.workspace.onDidSaveTextDocument(async (document) => {
         const config = getConfiguration();
         if (config.autoRunOnSave) {
+            await analyzeQuery(document);
+        }
+    });
+    
+    // Event listener for file change (auto analysis if enabled)
+    vscode.workspace.onDidChangeTextDocument(async (event) => {
+        const config = getConfiguration();
+        if (config.autoRunOnChange && (event.document.languageId === 'sql' || event.document.fileName.endsWith('.sql'))) {
+            // Clear any existing timer to implement debouncing
+            if (changeDebounceTimer) {
+                clearTimeout(changeDebounceTimer);
+            }
+            
+            // Set a new timer using the configured debounce delay
+            changeDebounceTimer = setTimeout(async () => {
+                await analyzeQuery(event.document);
+                // Clear the timer reference once executed
+                changeDebounceTimer = undefined;
+            }, config.changeDebounceDelayMs);
+        }
+    });
+    
+    // Event listener for file open (auto analysis if enabled)
+    vscode.workspace.onDidOpenTextDocument(async (document) => {
+        const config = getConfiguration();
+        if (config.autoRunOnOpen && (document.languageId === 'sql' || document.fileName.endsWith('.sql'))) {
             await analyzeQuery(document);
         }
     });
