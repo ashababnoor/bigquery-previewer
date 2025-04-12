@@ -5,6 +5,7 @@ import { BigQuery } from '@google-cloud/bigquery';
 
 let statusBarItem: vscode.StatusBarItem;
 let resultStatusBarItem: vscode.StatusBarItem; // New status bar item for displaying results
+let isResultStatusBarVisible = false; // Track visibility state manually
 let lastRunTime: number | null = null;
 let isRunning = false;
 let waitTimeUntilNextRun: number = 5000; // 5 seconds
@@ -33,8 +34,8 @@ function updateStatusBar(message: string, color: vscode.ThemeColor, backgroundCo
     if (!resultStatusBarItem) {
         resultStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 99);
         resultStatusBarItem.command = 'bigquery-previewer.showResultOptions';
-        resultStatusBarItem.show();
     }
+    
     resultStatusBarItem.text = message;
     resultStatusBarItem.color = color;
     
@@ -44,11 +45,16 @@ function updateStatusBar(message: string, color: vscode.ThemeColor, backgroundCo
     } else {
         resultStatusBarItem.backgroundColor = undefined; // Reset to default if not specified
     }
+    
+    // Make sure it's visible and update our tracking variable
+    resultStatusBarItem.show();
+    isResultStatusBarVisible = true;
 }
 
 function hideResultStatusBar() {
-    if (resultStatusBarItem) {
+    if (resultStatusBarItem && isResultStatusBarVisible) {
         resultStatusBarItem.hide();
+        isResultStatusBarVisible = false;
     }
 }
 
@@ -251,16 +257,31 @@ export function activate(context: vscode.ExtensionContext) {
 	});
 	
 	const showResultOptionsCommand = vscode.commands.registerCommand('bigquery-previewer.showResultOptions', async () => {
-		const selected = await vscode.window.showQuickPick([
-			{ label: '$(debug-pause) Pause', description: 'Pause BigQuery Previewer' },
-			{ label: '$(eye-closed) Hide', description: 'Hide this result' }
-		], {
+		// Create array for quick pick options
+		const options = [];
+		
+		// Add the appropriate toggle option based on extension state
+		if (isExtensionActive) {
+			options.push({ label: '$(debug-pause) Pause', description: 'Pause BigQuery Previewer' });
+		} else {
+			options.push({ label: '$(debug-start) Start', description: 'Start BigQuery Previewer' });
+		}
+		
+		// Only add hide option if the result bar is visible
+		if (isResultStatusBarVisible) {
+			options.push({ label: '$(eye-closed) Hide', description: 'Hide this result' });
+		}
+		
+		// Show the quick pick with available options
+		const selected = await vscode.window.showQuickPick(options, {
 			placeHolder: 'Select an action for BigQuery Previewer'
 		});
 		
 		if (selected) {
 			if (selected.label.includes('Pause')) {
 				vscode.commands.executeCommand('bigquery-previewer.pauseExtension');
+			} else if (selected.label.includes('Start')) {
+				vscode.commands.executeCommand('bigquery-previewer.startExtension');
 			} else if (selected.label.includes('Hide')) {
 				hideResultStatusBar();
 			}
