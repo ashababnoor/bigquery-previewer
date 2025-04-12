@@ -15,6 +15,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Auto-analysis on text selection: SQL queries are automatically analyzed when text is selected (with rate limiting)
 - Delayed selection analysis: Waits for selections to stabilize before analysis and cancels if selection is removed
 - Custom wait time parameter for analysis function, allowing flexible rate limiting for different analysis triggers
+- Dry Run Tracking: New option to track the number and timing of dry run operations
+  - Track total count of dry runs performed during the session
+  - View statistics in the output panel when enabled
+- Toggle for enabling/disabling dry run tracking via settings (`bigqueryPreviewer.trackDryRuns`)
 
 ### Changed
 - Improved performance: Skip analysis when closing files, even if they're being saved during closure
