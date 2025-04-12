@@ -30,26 +30,22 @@ BigQuery Previewer is a Visual Studio Code extension that helps developers analy
 
 ## 3. Non-Functional Requirements
 
-**R11.** The extension should return feedback in under 1 second for typical queries.
-
-**R12.** No sensitive query data should be stored or executed during the dry run process.
-
-**R13.** The extension must support Windows, macOS, and Linux environments.
-
-**R14.** Users must be able to configure thresholds and toggle features such as warnings and notifications.
-
-**R15.** The extension must be installable locally via a `.vsix` file without requiring it to be published on the marketplace.
-
-**R16.** The extension should support mocking dry run behavior to allow for unit and integration testing.
+**R11.** The extension should return feedback in under 1 second for typical queries.  
+**R12.** No sensitive query data should be stored or executed during the dry run process.  
+**R13.** The extension must support Windows, macOS, and Linux environments.  
+**R14.** Users must be able to configure thresholds and toggle features such as warnings and notifications.  
+**R15.** The extension must be installable locally via a `.vsix` file without requiring it to be published on the marketplace.  
+**R16.** The extension should support mocking dry run behavior to allow for unit and integration testing.  
 
 ---
 
 ## 4. User Interface Requirements
 
 ### 4.1 Status Bar Feedback  
-**R17.** The extension must show scan results (e.g., bytes to be scanned, error state) in the VS Code status bar by default.
-**R18.** The status bar output must be clear and human-readable, displaying the scan size in MB or GB.
-**R19.** The status bar output must be color coded to indicate the state (e.g., green for safe, yellow for warning, red for error).
+**R17.** The extension must show scan results (e.g., bytes to be scanned, error state) in the VS Code status bar by default.  
+  **R17.1.** If the status bar is enabled, the extension must indicate in the status bar when the analysis starts (e.g. `"Analyzing..."`), and update it with the result (success, warning, or error) when done instead of creating popups (info message). If the status bar is disabled, the extension must fall back to using popups.  
+**R18.** The status bar output must be clear and human-readable, displaying the scan size in MB or GB.  
+**R19.** The status bar output must be color coded to indicate the state (e.g., green for safe, yellow for warning, red for error).  
 
 ### 4.2 Notifications  
 **R20.** The extension must support (optional) popup notifications to display scan warnings or error messages. This behavior should be configurable.
