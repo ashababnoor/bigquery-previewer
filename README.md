@@ -117,6 +117,8 @@ gcloud auth application-default login
 
 ## Release Notes
 
+Check out the [CHANGELOG](CHANGELOG.md) for detailed release notes.
+
 ### 1.0.0 - April 2025
 
 - Initial release with dry run, scan estimation, and error detection features
