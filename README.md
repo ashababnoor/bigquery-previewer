@@ -31,6 +31,18 @@ BigQuery Previewer is a Visual Studio Code extension that helps developers analy
 
 ## Installation
 
+### From VS Code Marketplace
+The easiest way to install BigQuery Previewer:
+1. Open VS Code
+2. Go to the Extensions view (`Ctrl+Shift+X` or `Cmd+Shift+X` on macOS)
+3. Search for `shabab.bigquery-previewer`
+4. Click Install
+
+You can also install directly from the command line:
+```
+code --install-extension shabab.bigquery-previewer
+```
+
 ### From VSIX File
 1. Download the `.vsix` file from the repository releases.
 2. In VS Code, go to the Extensions view (`Ctrl+Shift+X` or `Cmd+Shift+X` on macOS). Click on the "..." menu at the top-right of the Extensions panel and select "Install from VSIX...".
