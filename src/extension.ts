@@ -4,6 +4,9 @@ import * as vscode from 'vscode';
 import { BigQuery } from '@google-cloud/bigquery';
 
 let statusBarItem: vscode.StatusBarItem;
+let lastRunTime: number | null = null;
+let isRunning = false;
+let waitTimeUntilNextRun: number = 5000; // 5 seconds
 
 function updateStatusBar(message: string, color: vscode.ThemeColor) {
     if (!statusBarItem) {
@@ -59,6 +62,22 @@ export async function performDryRun(query: string): Promise<{ scannedBytes: numb
 
 async function analyzeQuery(document: vscode.TextDocument) {
     const config = getConfiguration();
+    const currentTime = Date.now();
+	
+	// Guard clause to check if the document is available
+	if (!document) {
+		vscode.window.showErrorMessage('No active editor found. Please open a .sql file to analyze.');
+		return;
+	}
+
+	if (isRunning) {
+		if (lastRunTime && (currentTime - lastRunTime < waitTimeUntilNextRun)) {
+			console.log('Skipping analysis as it is already running and wait time has not elapsed.');
+			return;
+		}
+	}
+
+    isRunning = true;
     if (document.languageId === 'sql' || document.fileName.endsWith('.sql')) {
         if (config.enableStatusBar) {
             updateStatusBar('Analyzing...', new vscode.ThemeColor('statusBarItem.foreground'));
@@ -71,7 +90,7 @@ async function analyzeQuery(document: vscode.TextDocument) {
 
         if (errors.length > 0) {
             if (config.enableStatusBar) {
-                updateStatusBar('Error in query analysis', new vscode.ThemeColor('statusBarItem.errorForeground'));
+                updateStatusBar(`Error in query analysis: ${errors.join('; ')}`, new vscode.ThemeColor('statusBarItem.errorForeground'));
             } else {
                 vscode.window.showErrorMessage(`Query analysis failed: ${errors.join('; ')}`);
             }
@@ -93,6 +112,9 @@ async function analyzeQuery(document: vscode.TextDocument) {
             }
         }
     }
+
+    lastRunTime = Date.now();
+    isRunning = false;
 }
 
 // This method is called when your extension is activated
