@@ -615,8 +615,9 @@ export function activate(context: vscode.ExtensionContext) {
 		}
 	}));
 
+	// Register all event listeners for proper disposal
 	// Event listener for file save (auto analysis if enabled and extension is active)
-	vscode.workspace.onDidSaveTextDocument(async (document) => {
+	context.subscriptions.push(vscode.workspace.onDidSaveTextDocument(async (document) => {
         if (!isExtensionActive) return;
         
         // Skip analysis if this document is being closed or was recently in a save operation
@@ -636,10 +637,10 @@ export function activate(context: vscode.ExtensionContext) {
                 await analyzeQuery(document, editor);
             }
         }
-    });
+    }));
     
     // Event listener for file change (auto analysis if enabled and extension is active)
-    vscode.workspace.onDidChangeTextDocument(async (event) => {
+    context.subscriptions.push(vscode.workspace.onDidChangeTextDocument(async (event) => {
         if (!isExtensionActive) return;
         
         const config = getConfiguration();
@@ -658,10 +659,10 @@ export function activate(context: vscode.ExtensionContext) {
                 changeDebounceTimer = undefined;
             }, config.changeDebounceDelayMs);
         }
-    });
+    }));
     
     // Event listener for file open (auto analysis if enabled and extension is active)
-    vscode.workspace.onDidOpenTextDocument(async (document) => {
+    context.subscriptions.push(vscode.workspace.onDidOpenTextDocument(async (document) => {
         if (!isExtensionActive) return;
         
         const config = getConfiguration();
@@ -670,12 +671,12 @@ export function activate(context: vscode.ExtensionContext) {
             const editor = vscode.window.visibleTextEditors.find(e => e.document.uri.toString() === document.uri.toString());
             await analyzeQuery(document, editor);
         }
-    });
+    }));
 
     // Event listener for selection change
-    vscode.window.onDidChangeTextEditorSelection((event) => {
+    context.subscriptions.push(vscode.window.onDidChangeTextEditorSelection((event) => {
         handleSelectionChange(event.textEditor);
-    });
+    }));
 }
 
 // This method is called when your extension is deactivated
@@ -687,4 +688,31 @@ export function deactivate() {
     if (resultStatusBarItem) {
         resultStatusBarItem.dispose();
     }
+
+    // Clear any pending timers
+    if (changeDebounceTimer) {
+        clearTimeout(changeDebounceTimer);
+        changeDebounceTimer = undefined;
+    }
+    
+    if (selectionAnalysisTimer) {
+        clearTimeout(selectionAnalysisTimer);
+        selectionAnalysisTimer = undefined;
+    }
+
+    // Clear all timeouts in savingDocuments Map
+    savingDocuments.forEach((timer) => {
+        clearTimeout(timer);
+    });
+
+    // Clear collection data
+    documentVersions.clear();
+    closingDocuments.clear();
+    savingDocuments.clear();
+    
+    // Reset state variables that might hold references
+    lastSelection = undefined;
+    lastFullErrorMessage = null;
+    
+    console.log('BigQuery Previewer extension deactivated, all resources cleared.');
 }
