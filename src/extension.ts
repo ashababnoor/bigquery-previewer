@@ -23,12 +23,12 @@ let lastDryRunTime: number | null = null;
 let dryRunTrackingEnabled: boolean = false;
 
 // Variables for selection analysis
-const SELECTION_DELAY = 750; // 750ms delay before analyzing a selection
+const selectionStabilizationDelay = 750; // 750ms delay before analyzing a selection
 let selectionAnalysisTimer: NodeJS.Timeout | undefined; // Timer for delayed selection analysis
 let lastSelection: { editor: vscode.TextEditor; selection: vscode.Selection; timestamp: number } | undefined; // Track last selection
 let selectionTriggerCount = 0; // Count selection trigger events to prevent excessive analysis
-const MAX_SELECTION_TRIGGERS = 5; // Maximum number of selection events allowed in quick succession
-const SELECTION_TRIGGER_RESET_TIME = 1500; // Time in ms to reset the trigger count
+const maxSelectionTriggers = 5; // Maximum number of selection events allowed in quick succession
+const selectionTriggerResetTime = 1500; // Time in ms to reset the trigger count
 
 /**
  * Formats data size in bytes to a human-readable string (KB, MB, GB, TB)
@@ -320,7 +320,7 @@ async function analyzeQuery(document: vscode.TextDocument, editor?: vscode.TextE
 
 /**
  * Handles selection changes with a stabilization delay to prevent excessive analysis
- * Will only analyze a selection after it remains unchanged for SELECTION_DELAY milliseconds
+ * Will only analyze a selection after it remains unchanged for selectionStabilizationDelay milliseconds
  * @param editor The text editor with the selection change
  */
 function handleSelectionChange(editor: vscode.TextEditor): void {
@@ -337,11 +337,11 @@ function handleSelectionChange(editor: vscode.TextEditor): void {
     selectionTriggerCount++;
     
     // If we've hit the limit, wait before enabling more triggers
-    if (selectionTriggerCount > MAX_SELECTION_TRIGGERS) {
+    if (selectionTriggerCount > maxSelectionTriggers) {
         console.log('Too many selection changes detected. Waiting before enabling more selection triggers.');
         setTimeout(() => {
             selectionTriggerCount = 0;
-        }, SELECTION_TRIGGER_RESET_TIME);
+        }, selectionTriggerResetTime);
         return;
     }
     
@@ -380,7 +380,7 @@ function handleSelectionChange(editor: vscode.TextEditor): void {
             await analyzeQuery(editor.document, editor);
         }
         selectionAnalysisTimer = undefined;
-    }, SELECTION_DELAY);
+    }, selectionStabilizationDelay);
 }
 
 /**
