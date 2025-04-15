@@ -56,6 +56,10 @@
       {
         "command": "bigquery-previewer.showResultOptions",
         "title": "BigQuery Previewer: Show Result Options"
+      },
+      {
+        "command": "bigquery-previewer.settings",
+        "title": "BigQuery Previewer: Open Settings"
       }
     ],
     "colors": [
