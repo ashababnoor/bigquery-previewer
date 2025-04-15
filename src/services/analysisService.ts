@@ -116,7 +116,7 @@ export async function analyzeQuery(
                 const selectionPrefix = isSelectionAnalysis ? '$(selection) Selection: ' : '';
                 
                 if (config.showScanWarnings && scannedBytes > mbThresholdInBytes) {
-                    const fullWarningMessage = `${selectionMsg} successful. Estimated scan size: ${formattedScanSize} exceeds the threshold of ${formatDataSize(mbThresholdInBytes)}.`;
+                    const fullWarningMessage = `Estimated scan size: ${formattedScanSize} exceeds the threshold of ${formatDataSize(mbThresholdInBytes)}.`;
                     // Make status bar more informative by including threshold information
                     const shortWarningMessage = `${selectionPrefix}$(warning) Scan: ${formattedScanSize} (> ${formatDataSize(mbThresholdInBytes)})`;
                     
@@ -131,7 +131,7 @@ export async function analyzeQuery(
                         vscode.window.showWarningMessage(fullWarningMessage);
                     }
                 } else {
-                    const fullSuccessMessage = `${selectionMsg} successful. Estimated scan size: ${formattedScanSize}.`;
+                    const fullSuccessMessage = `Estimated scan size: ${formattedScanSize}.`;
                     const shortSuccessMessage = `${selectionPrefix}$(pass-filled) Scan: ${formattedScanSize}`;
                     
                     if (config.enableStatusBar) {
