@@ -10,7 +10,8 @@ import {
     pauseExtensionHandler,
     analyzeQueryHandler, 
     showResultOptionsHandler,
-    getExtensionActiveState
+    getExtensionActiveState,
+    settingsHandler
 } from './commands/commands';
 import { initializeStatusBar, disposeStatusBar } from './ui/statusBarManager';
 import { clearDocumentVersionCache } from './utils/documentUtils';
@@ -34,13 +35,15 @@ export function activate(context: vscode.ExtensionContext) {
     const pauseExtensionCommand = vscode.commands.registerCommand('bigquery-previewer.pauseExtension', pauseExtensionHandler);
     const showResultOptionsCommand = vscode.commands.registerCommand('bigquery-previewer.showResultOptions', showResultOptionsHandler);
     const analyzeQueryCommand = vscode.commands.registerCommand('bigquery-previewer.analyzeQuery', analyzeQueryHandler);
+    const settingsCommand = vscode.commands.registerCommand('bigquery-previewer.settings', settingsHandler);
 
     // Register commands with context subscriptions for proper disposal
     context.subscriptions.push(
         startExtensionCommand,
         pauseExtensionCommand,
         showResultOptionsCommand,
-        analyzeQueryCommand
+        analyzeQueryCommand,
+        settingsCommand
     );
 
     // Add selection change event listener
