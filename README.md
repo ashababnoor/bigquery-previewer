@@ -113,12 +113,12 @@ This extension contributes the following settings:
 | `bigqueryPreviewer.serviceAccountKeyPath` | Path to service account key file | `""` |
 | `bigqueryPreviewer.showScanWarnings` | Enable or disable scan warnings | `true` |
 | `bigqueryPreviewer.scanWarningThresholdMB` | Threshold for scan size warnings (MB) | `100` |
+| `bigqueryPreviewer.enableStatusBar` | Show analysis results in the status bar | `true` |
+| `bigqueryPreviewer.enableNotifications` | Show notifications for analysis results | `false` |
+| `bigqueryPreviewer.autoRunOnOpen` | Automatically analyze query when opening a SQL file | `true` |
 | `bigqueryPreviewer.autoRunOnSave` | Automatically analyze query when saving file | `true` |
 | `bigqueryPreviewer.autoRunOnChange` | Automatically analyze query when file content changes | `true` |
 | `bigqueryPreviewer.changeDebounceDelayMs` | Delay in milliseconds before analyzing after changes | `3000` |
-| `bigqueryPreviewer.autoRunOnOpen` | Automatically analyze query when opening a SQL file | `true` |
-| `bigqueryPreviewer.enableStatusBar` | Show analysis results in the status bar | `true` |
-| `bigqueryPreviewer.enableNotifications` | Show notifications for analysis results | `false` |
 | `bigqueryPreviewer.trackDryRuns` | Track the number and timing of dry run operations | `false` |
 
 ## Authentication
@@ -128,6 +128,12 @@ Use the Google Cloud SDK to authenticate:
 ```bash
 gcloud auth application-default login
 ```
+
+After authenticating, set a project ID using:
+```bash
+gcloud config set project YOUR_PROJECT_ID
+```
+This will allow the extension to use your default credentials for BigQuery API calls.
 
 ### Service Account
 1. Create a service account with appropriate BigQuery permissions
