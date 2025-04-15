@@ -79,6 +79,12 @@ export async function analyzeQuery(
                 }
             }
 
+            // If the query is empty, skip analysis
+            if (query == null || query.trim().length === 0) {
+                console.log('No query to analyze. Skipping analysis.');
+                return;
+            }
+
             const { scannedBytes, errors } = await performDryRun(query);
 
             if (errors.length > 0) {
