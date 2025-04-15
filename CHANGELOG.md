@@ -26,6 +26,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Improved code organization with centralized SQL file detection logic
 - Enhanced `analyzeQuery` function to accept an optional wait time parameter, providing more flexible control over analysis timing
 
+## [1.0.1] - 2025-04-15
+
+### Changed
+- Reduced minimum VS Code version requirement from 1.99.0 to 1.74.0 for better compatibility with older VS Code installations
+
 ## [1.0.0] - 2025-04-12
 
 ### Added
@@ -56,5 +61,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Debounce delay configuration
   - UI feedback preferences
 
+[1.0.1]: https://github.com/ashababnoor/bigquery-previewer/releases/tag/v1.0.1
 [1.0.0]: https://github.com/ashababnoor/bigquery-previewer/releases/tag/v1.0.0
 [Unreleased]: https://github.com/ashababnoor/bigquery-previewer/compare/v1.0.0...HEAD
