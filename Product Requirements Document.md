@@ -31,6 +31,14 @@ BigQuery Previewer is a Visual Studio Code extension that helps developers analy
   **R9.2.** Automatic analysis on file change (if enabled in settings).  
     **R9.2.1.** When analyzing on file change, the extension must implement a configurable debounce mechanism to prevent excessive API calls during typing.  
   **R9.3.** Automatic analysis on file open (if enabled in settings).  
+  **R9.4.** Automatic analysis on text selection after a stabilization delay (750ms; configurable).
+    **R9.4.1.** The extension must only analyze a selection after it remains unchanged for the stabilization period.
+    **R9.4.2.** The extension must cancel pending selection analysis if the selection changes before the delay elapses.
+    **R9.4.3.** The extension must limit the number of selection-triggered analyses to prevent excessive API calls.
+    **R9.4.4.** Selection-based analysis results must be visually distinct in the status bar (with a selection icon).
+  **R9.5.** The extension must support different wait time intervals between analyses for different trigger types.
+    **R9.5.1.** The analysis function must support a configurable override for the default wait time.
+    **R9.5.2.** The extension must allow for customized wait times based on the type of trigger (manual, save, change, open, selection).
 **R10.** The extension must provide a way to cancel an ongoing analysis if needed.  
 **R11.** The extension must start in a paused state, requiring explicit activation before performing any analysis.  
   **R11.1.** The extension must display a status bar button to start/pause the extension.  
@@ -42,42 +50,48 @@ BigQuery Previewer is a Visual Studio Code extension that helps developers analy
     **R12.1.2** When the extension is paused, show an option to start it.  
     **R12.1.3** Show an option to hide the result only when results are visible.
 
+### 2.6 Performance Monitoring
+**R13.** The extension must support tracking of dry run operations.  
+  **R13.1.** The extension must track the number of dry run operations performed.  
+  **R13.2.** The extension must track the timing of dry run operations.  
+  **R13.3.** The tracking feature must be configurable through the `bigqueryPreviewer.trackDryRuns` setting.
+
 ## 3. Non-Functional Requirements
 
-**R13.** The extension should return feedback in under 1 second for typical queries.  
-**R14.** No sensitive query data should be stored or executed during the dry run process.  
-**R15.** The extension must support Windows, macOS, and Linux environments.  
-**R16.** Users must be able to configure thresholds and toggle features such as warnings and notifications.  
-**R17.** The extension must be installable locally via a `.vsix` file without requiring it to be published on the marketplace.  
-**R18.** The extension should support mocking dry run behavior to allow for unit and integration testing.  
+**R14.** The extension should return feedback in under 1 second for typical queries.  
+**R15.** No sensitive query data should be stored or executed during the dry run process.  
+**R16.** The extension must support Windows, macOS, and Linux environments.  
+**R17.** Users must be able to configure thresholds and toggle features such as warnings and notifications.  
+**R18.** The extension must be installable locally via a `.vsix` file without requiring it to be published on the marketplace.  
+**R19.** The extension should support mocking dry run behavior to allow for unit and integration testing.  
 
 ---
 
 ## 4. User Interface Requirements
 
 ### 4.1 Status Bar Feedback  
-**R19.** The extension must show scan results (e.g., bytes to be scanned, error state) in the VS Code status bar by default.  
-  **R19.1.** If the status bar is enabled, the extension must indicate in the status bar when the analysis starts (e.g. `"Analyzing..."`), and update it with the result (success, warning, or error) when done instead of creating popups (info message). If the status bar is disabled, the extension must fall back to using popups.  
-**R20.** The status bar output must be clear and human-readable, displaying the scan size in MB or GB.  
-**R21.** The status bar output must be color coded to indicate the state (e.g., green for safe, yellow for warning, red for error).  
+**R20.** The extension must show scan results (e.g., bytes to be scanned, error state) in the VS Code status bar by default.  
+  **R20.1.** If the status bar is enabled, the extension must indicate in the status bar when the analysis starts (e.g. `"Analyzing..."`), and update it with the result (success, warning, or error) when done instead of creating popups (info message). If the status bar is disabled, the extension must fall back to using popups.  
+**R21.** The status bar output must be clear and human-readable, displaying the scan size in MB or GB.  
+**R22.** The status bar output must be color coded to indicate the state (e.g., green for safe, yellow for warning, red for error).  
 
 ### 4.2 Notifications  
-**R22.** The extension must support (optional) popup notifications to display scan warnings or error messages. This behavior should be configurable.
+**R23.** The extension must support (optional) popup notifications to display scan warnings or error messages. This behavior should be configurable.
 
 ---
 
 ## 5. Authentication
 
-**R23.** The extension must support authentication via Application Default Credentials (ADC) using `gcloud auth application-default login`.  
-**R24.** The extension must support service account authentication via a JSON key file path provided in settings.  
-**R25.** The extension must allow users to toggle between authentication methods in settings.  
-**R26.** The extension must provide clear documentation on how to set up each authentication method.
+**R24.** The extension must support authentication via Application Default Credentials (ADC) using `gcloud auth application-default login`.  
+**R25.** The extension must support service account authentication via a JSON key file path provided in settings.  
+**R26.** The extension must allow users to toggle between authentication methods in settings.  
+**R27.** The extension must provide clear documentation on how to set up each authentication method.
 
 ---
 
 ## 6. Configuration Options
 
-**R27.** The extension must expose the following configurable options via `settings.json`:
+**R28.** The extension must expose the following configurable options via `settings.json`:
 
 ```json
 {
@@ -87,9 +101,10 @@ BigQuery Previewer is a Visual Studio Code extension that helps developers analy
   "bigqueryPreviewer.scanWarningThresholdMB": 100,
   "bigqueryPreviewer.autoRunOnSave": true,
   "bigqueryPreviewer.autoRunOnChange": true,
+  "bigqueryPreviewer.changeDebounceDelayMs": 1500,
   "bigqueryPreviewer.autoRunOnOpen": true,
   "bigqueryPreviewer.enableStatusBar": true,
   "bigqueryPreviewer.enableNotifications": false,
-  "bigqueryPreviewer.changeDebounceDelayMs": 1500
+  "bigqueryPreviewer.trackDryRuns": false
 }
 ```

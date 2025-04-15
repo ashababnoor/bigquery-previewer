@@ -12,17 +12,25 @@ Find the extension on the [VS Code Marketplace](https://marketplace.visualstudio
 - **Dry Run Execution**: Analyze BigQuery SQL files without executing them.
 - **Scan Estimation**: Fetch and display the total estimated bytes scanned by the query.
 - **Error Detection**: Identify syntax or semantic errors in queries.
+- **Selection Analysis**: Select specific parts of SQL files for targeted analysis.
 - **Interactive UI Controls**:
   - Start/pause analysis via status bar button or command palette
   - Interactive result display with options to pause or hide results
+  - Hover over messages for detailed information
 - **Multiple Triggering Mechanisms**:
   - Analyze queries manually via Command Palette
   - Set custom keyboard shortcuts for quick analysis
   - Automatically analyze on file save
   - Automatically analyze on file content changes (with configurable debounce delay)
   - Automatically analyze when opening SQL files
-- **Intelligent Analysis**: Avoids redundant analysis of unchanged content within a specified time window.
-- **Status Bar Integration**: Real-time feedback with color coding (green for success, yellow for warnings, red for errors).
+  - Automatically analyze selected text after selection stabilizes (with configurable delay)
+- **Intelligent Analysis**: 
+  - Avoids redundant analysis of unchanged content within a specified time window
+  - Cancels pending selection analysis if selection changes
+- **Status Bar Integration**: 
+  - Real-time feedback with color coding (green for success, yellow for warnings, red for errors)
+  - Visual distinction between full-file analysis and selection-based analysis
+  - Automatic data size formatting (KB, MB, GB, or TB as appropriate)
 - **Configurable Settings**: Customize thresholds, toggle features, and control automatic analysis behavior.
 
 ## Requirements
@@ -32,6 +40,18 @@ Find the extension on the [VS Code Marketplace](https://marketplace.visualstudio
 - Node.js and npm (for development only).
 
 ## Installation
+
+### From VS Code Marketplace
+The easiest way to install BigQuery Previewer:
+1. Open VS Code
+2. Go to the Extensions view (`Ctrl+Shift+X` or `Cmd+Shift+X` on macOS)
+3. Search for `shabab.bigquery-previewer`
+4. Click Install
+
+You can also install directly from the command line:
+```
+code --install-extension shabab.bigquery-previewer
+```
 
 ### From VSIX File
 1. Download the `.vsix` file from the repository releases.
@@ -71,6 +91,7 @@ Find the extension on the [VS Code Marketplace](https://marketplace.visualstudio
 ### Manual Analysis
 - Run the command `BigQuery Previewer: Analyze Query` from the Command Palette (`Cmd+Shift+P` or `Ctrl+Shift+P`).
 - If the extension is paused, you'll be prompted to activate it first.
+- **Selection Analysis**: When you select a portion of your SQL file, only the selected text will be analyzed instead of the entire file. The status bar will show a "Selection:" prefix to indicate partial analysis.
 - Customize a keyboard shortcut for frequent use.
 
 ### Automatic Analysis
@@ -78,6 +99,7 @@ When the extension is active, it analyzes SQL files:
 - When opening a SQL file (if `autoRunOnOpen` is enabled)
 - When saving a SQL file (if `autoRunOnSave` is enabled)
 - When making changes to a SQL file (if `autoRunOnChange` is enabled)
+- If you have text selected, automatic analysis will use your current selection
 
 These automatic behaviors can be enabled or disabled in settings.
 
@@ -91,12 +113,13 @@ This extension contributes the following settings:
 | `bigqueryPreviewer.serviceAccountKeyPath` | Path to service account key file | `""` |
 | `bigqueryPreviewer.showScanWarnings` | Enable or disable scan warnings | `true` |
 | `bigqueryPreviewer.scanWarningThresholdMB` | Threshold for scan size warnings (MB) | `100` |
-| `bigqueryPreviewer.autoRunOnSave` | Automatically analyze on file save | `true` |
-| `bigqueryPreviewer.autoRunOnChange` | Automatically analyze on file content change | `true` |
-| `bigqueryPreviewer.changeDebounceDelayMs` | Delay in milliseconds to wait after typing stops before analyzing (when autoRunOnChange is enabled) | `1500` |
-| `bigqueryPreviewer.autoRunOnOpen` | Automatically analyze when opening a file | `true` |
-| `bigqueryPreviewer.enableStatusBar` | Enable or disable status bar feedback | `true` |
-| `bigqueryPreviewer.enableNotifications` | Enable or disable popup notifications | `false` |
+| `bigqueryPreviewer.autoRunOnSave` | Automatically analyze query when saving file | `true` |
+| `bigqueryPreviewer.autoRunOnChange` | Automatically analyze query when file content changes | `true` |
+| `bigqueryPreviewer.changeDebounceDelayMs` | Delay in milliseconds before analyzing after changes | `3000` |
+| `bigqueryPreviewer.autoRunOnOpen` | Automatically analyze query when opening a SQL file | `true` |
+| `bigqueryPreviewer.enableStatusBar` | Show analysis results in the status bar | `true` |
+| `bigqueryPreviewer.enableNotifications` | Show notifications for analysis results | `false` |
+| `bigqueryPreviewer.trackDryRuns` | Track the number and timing of dry run operations | `false` |
 
 ## Authentication
 
