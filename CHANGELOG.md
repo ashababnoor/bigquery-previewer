@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Track total count of dry runs performed during the session
   - View statistics in the output panel when enabled
 - Toggle for enabling/disabling dry run tracking via settings (`bigqueryPreviewer.trackDryRuns`)
+- Avoid analyzing if file is empty or contains only whitespace
 
 ### Changed
 - Improved performance: Skip analysis when closing files, even if they're being saved during closure
