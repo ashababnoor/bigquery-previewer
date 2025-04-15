@@ -11,6 +11,12 @@ export function initializeStatusBar(): void {
     // Create main control status bar item
     if (!statusBarItem) {
         statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100);
+        // Set initial state (paused)
+        statusBarItem.text = "$(debug-start) BigQuery Previewer";
+        statusBarItem.tooltip = "Click to activate BigQuery Previewer";
+        statusBarItem.command = 'bigquery-previewer.startExtension';
+        // Show immediately on initialization
+        statusBarItem.show();
     }
     
     // Create result status bar item
