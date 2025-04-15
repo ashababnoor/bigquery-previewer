@@ -5,6 +5,11 @@ All notable changes to the "BigQuery Previewer" extension will be documented in 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.1] - 2025-04-15
+
+### Changed
+- Reduced minimum VS Code version requirement from 1.99.0 to 1.74.0 for better compatibility with older VS Code installations
+
 ## [1.0.0] - 2025-04-12
 
 ### Added
@@ -35,4 +40,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Debounce delay configuration
   - UI feedback preferences
 
+[1.0.1]: https://github.com/ashababnoor/bigquery-previewer/releases/tag/v1.0.1
 [1.0.0]: https://github.com/ashababnoor/bigquery-previewer/releases/tag/v1.0.0
