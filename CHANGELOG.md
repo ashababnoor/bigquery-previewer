@@ -61,6 +61,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Debounce delay configuration
   - UI feedback preferences
 
+[Unreleased]: https://github.com/ashababnoor/bigquery-previewer/compare/v1.0.1...HEAD
 [1.0.1]: https://github.com/ashababnoor/bigquery-previewer/releases/tag/v1.0.1
 [1.0.0]: https://github.com/ashababnoor/bigquery-previewer/releases/tag/v1.0.0
-[Unreleased]: https://github.com/ashababnoor/bigquery-previewer/compare/v1.0.0...HEAD
