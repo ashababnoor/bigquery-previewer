@@ -42,16 +42,16 @@
   "contributes": {
     "commands": [
       {
-        "command": "bigquery-previewer.analyzeQuery",
-        "title": "BigQuery Previewer: Analyze Query"
-      },
-      {
         "command": "bigquery-previewer.startExtension",
         "title": "BigQuery Previewer: Start"
       },
       {
         "command": "bigquery-previewer.pauseExtension",
         "title": "BigQuery Previewer: Pause"
+      },
+      {
+        "command": "bigquery-previewer.analyzeQuery",
+        "title": "BigQuery Previewer: Analyze Query"
       },
       {
         "command": "bigquery-previewer.showResultOptions",
@@ -81,59 +81,70 @@
             "service_account"
           ],
           "default": "adc",
-          "description": "Authentication mode for BigQuery. Use `adc` for Application Default Credentials (requires gcloud auth) or `service_account` to use a service account key file."
+          "description": "Authentication mode for BigQuery. Use `adc` for Application Default Credentials (requires gcloud auth) or `service_account` to use a service account key file.",
+          "order": 1
         },
         "bigqueryPreviewer.serviceAccountKeyPath": {
           "type": "string",
           "default": "",
-          "description": "Path to the service account key file (JSON). Only used when authMode is set to `service_account`."
+          "description": "Path to the service account key file (JSON). Only used when authMode is set to `service_account`.",
+          "order": 2
         },
         "bigqueryPreviewer.showScanWarnings": {
           "type": "boolean",
           "default": true,
-          "description": "Show warnings when the scan size exceeds the threshold specified by `scanWarningThresholdMB`. When enabled, scan sizes above the threshold will be highlighted in the status bar (if enabled) or shown as warning popups."
+          "description": "Show warnings when the scan size exceeds the threshold specified by `scanWarningThresholdMB`. When enabled, scan sizes above the threshold will be highlighted in the status bar (if enabled) or shown as warning popups.",
+          "order": 3
         },
         "bigqueryPreviewer.scanWarningThresholdMB": {
           "type": "number",
           "default": 100,
-          "description": "Threshold in megabytes that triggers a warning when a query's scan size exceeds this value. Only applied when `showScanWarnings` is enabled."
-        },
-        "bigqueryPreviewer.autoRunOnSave": {
-          "type": "boolean",
-          "default": true,
-          "description": "Automatically analyze queries when a SQL file is saved. When disabled, you must use the command palette or keyboard shortcut to analyze queries."
-        },
-        "bigqueryPreviewer.autoRunOnChange": {
-          "type": "boolean",
-          "default": true,
-          "description": "Automatically analyze queries when an SQL file content changes, after the debounce delay specified by `changeDebounceDelayMs`. This avoids excessive API calls while typing."
-        },
-        "bigqueryPreviewer.autoRunOnOpen": {
-          "type": "boolean",
-          "default": true,
-          "description": "Automatically analyze queries when a SQL file is first opened in the editor."
+          "description": "Threshold in megabytes that triggers a warning when a query's scan size exceeds this value. Only applied when `showScanWarnings` is enabled.",
+          "order": 4
         },
         "bigqueryPreviewer.enableStatusBar": {
           "type": "boolean",
           "default": true,
-          "description": "Display the analysis results in the status bar. When both `enableStatusBar` and `enableNotifications` are enabled, the status bar will be given priority. When both are disabled, no analysis results will be shown."
+          "description": "Display the analysis results in the status bar. When both `enableStatusBar` and `enableNotifications` are enabled, the status bar will be given priority. When both are disabled, no analysis results will be shown.",
+          "order": 5
         },
         "bigqueryPreviewer.enableNotifications": {
           "type": "boolean",
           "default": false,
-          "description": "Show popup notifications for analysis results. When both `enableStatusBar` and `enableNotifications` are enabled, the status bar will be given priority. When both are disabled, no analysis results will be shown."
+          "description": "Show popup notifications for analysis results. When both `enableStatusBar` and `enableNotifications` are enabled, the status bar will be given priority. When both are disabled, no analysis results will be shown.",
+          "order": 6
+        },
+        "bigqueryPreviewer.autoRunOnOpen": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically analyze queries when a SQL file is first opened in the editor.",
+          "order": 7
+        },
+        "bigqueryPreviewer.autoRunOnSave": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically analyze queries when a SQL file is saved. When disabled, you must use the command palette or keyboard shortcut to analyze queries.",
+          "order": 8
+        },
+        "bigqueryPreviewer.autoRunOnChange": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically analyze queries when an SQL file content changes, after the debounce delay specified by `changeDebounceDelayMs`. This avoids excessive API calls while typing.",
+          "order": 9
         },
         "bigqueryPreviewer.changeDebounceDelayMs": {
           "type": "number",
           "default": 3000,
           "minimum": 1000,
           "maximum": 15000,
-          "description": "Delay in milliseconds to wait after typing stops before analyzing the query (when `autoRunOnChange` is enabled). Higher values reduce API calls but delay feedback."
+          "description": "Delay in milliseconds to wait after typing stops before analyzing the query (when `autoRunOnChange` is enabled). Higher values reduce API calls but delay feedback.",
+          "order": 10
         },
         "bigqueryPreviewer.trackDryRuns": {
           "type": "boolean",
           "default": false,
-          "description": "Track and log information about dry run calls including count, timestamps, and time differences between calls."
+          "description": "Track and log information about dry run calls including count, timestamps, and time differences between calls.",
+          "order": 11
         }
       }
     }
