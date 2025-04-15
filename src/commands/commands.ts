@@ -77,6 +77,14 @@ export async function pauseExtensionHandler(): Promise<void> {
 }
 
 /**
+ * Command handler for settings command
+ */
+export async function settingsHandler(): Promise<void> {
+    // Open VS Code settings page filtered to show only BigQuery Previewer settings
+    await vscode.commands.executeCommand('workbench.action.openSettings', 'bigqueryPreviewer');
+}
+
+/**
  * Command handler for analyze query command
  */
 export async function analyzeQueryHandler(): Promise<void> {
@@ -135,6 +143,9 @@ export async function showResultOptionsHandler(): Promise<void> {
         options.push({ label: '$(graph) Dry Run Stats', description: 'View dry run tracking statistics' });
     }
     
+    // Add option to open extension settings
+    options.push({ label: '$(gear) Settings', description: 'Open BigQuery Previewer settings' });
+    
     // Show the quick pick with available options
     const selected = await vscode.window.showQuickPick(options, {
         placeHolder: 'Select an action for BigQuery Previewer'
@@ -164,6 +175,8 @@ export async function showResultOptionsHandler(): Promise<void> {
 - Time since last run: ${stats.timeSinceLast}`;
 
             vscode.window.showInformationMessage(message, { modal: true });
+        } else if (selected.label.includes('Settings')) {
+            vscode.commands.executeCommand('bigquery-previewer.settings');
         }
     }
 }
