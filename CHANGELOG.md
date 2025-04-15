@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Added
+- New "BigQuery Previewer: Open Settings" command to directly access extension settings
+- "Settings" option in the result options menu to quickly access extension configuration
 - Selection Analysis: When text is selected in a SQL file, only the selected portion will be analyzed instead of the entire file
 - Visual indication in status bar when analyzing a selection vs. the entire file
 - Hover support for error messages: Full error details now appear when hovering over the status bar
