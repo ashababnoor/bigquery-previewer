@@ -9,7 +9,7 @@ import {
     startExtensionHandler, 
     pauseExtensionHandler,
     analyzeQueryHandler, 
-    showResultOptionsHandler,
+    showOptionsHandler,
     getExtensionActiveState,
     settingsHandler
 } from './commands/commands';
@@ -33,7 +33,7 @@ export function activate(context: vscode.ExtensionContext) {
     // Register commands with their handlers
     const startExtensionCommand = vscode.commands.registerCommand('bigquery-previewer.startExtension', startExtensionHandler);
     const pauseExtensionCommand = vscode.commands.registerCommand('bigquery-previewer.pauseExtension', pauseExtensionHandler);
-    const showResultOptionsCommand = vscode.commands.registerCommand('bigquery-previewer.showResultOptions', showResultOptionsHandler);
+    const showOptionsCommand = vscode.commands.registerCommand('bigquery-previewer.showOptions', showOptionsHandler);
     const analyzeQueryCommand = vscode.commands.registerCommand('bigquery-previewer.analyzeQuery', analyzeQueryHandler);
     const settingsCommand = vscode.commands.registerCommand('bigquery-previewer.settings', settingsHandler);
 
@@ -41,7 +41,7 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(
         startExtensionCommand,
         pauseExtensionCommand,
-        showResultOptionsCommand,
+        showOptionsCommand,
         analyzeQueryCommand,
         settingsCommand
     );

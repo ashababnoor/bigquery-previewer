@@ -16,7 +16,7 @@ export function initializeStatusBar(): void {
     // Create result status bar item
     if (!resultStatusBarItem) {
         resultStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 99);
-        resultStatusBarItem.command = 'bigquery-previewer.showResultOptions';
+        resultStatusBarItem.command = 'bigquery-previewer.showOptions';
     }
 }
 

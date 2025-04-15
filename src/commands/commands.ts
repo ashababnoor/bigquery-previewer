@@ -115,7 +115,7 @@ export async function analyzeQueryHandler(): Promise<void> {
 /**
  * Command handler for showing result options
  */
-export async function showResultOptionsHandler(): Promise<void> {
+export async function showOptionsHandler(): Promise<void> {
     // Create array for quick pick options
     const options = [];
     
@@ -130,6 +130,9 @@ export async function showResultOptionsHandler(): Promise<void> {
     if (isResultVisible()) {
         options.push({ label: '$(eye-closed) Hide', description: 'Hide this result' });
     }
+
+    // Add option to analyze the current query
+    options.push({ label: '$(search) Analyze Current Query', description: 'Analyze the current SQL query' });
 
     // Add option to view full error message if available
     const lastFullErrorMessage = getLastErrorMessage();
@@ -158,6 +161,8 @@ export async function showResultOptionsHandler(): Promise<void> {
             vscode.commands.executeCommand('bigquery-previewer.startExtension');
         } else if (selected.label.includes('Hide')) {
             hideResultStatusBar();
+        } else if (selected.label.includes('Analyze Current Query')) {
+            vscode.commands.executeCommand('bigquery-previewer.analyzeQuery');
         } else if (selected.label.includes('View Full Error')) {
             vscode.window.showErrorMessage(lastFullErrorMessage || 'No error message available.');
         } else if (selected.label.includes('Dry Run Stats')) {

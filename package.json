@@ -54,8 +54,8 @@
         "title": "BigQuery Previewer: Analyze Query"
       },
       {
-        "command": "bigquery-previewer.showResultOptions",
-        "title": "BigQuery Previewer: Show Result Options"
+        "command": "bigquery-previewer.showOptions",
+        "title": "BigQuery Previewer: Show Options"
       },
       {
         "command": "bigquery-previewer.settings",
